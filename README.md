@@ -1,6 +1,6 @@
 Amit Joshi's Image Padder pads images to be whatever aspect ratio you want while keeping preserving the original resolution. A suffix `-padded_WxH` is added to the resulting file.
 
-The program and the image padding algorithm were originally written by Amit Joshi (@amitjoshi24). Additional contributions were made by Jeffrey Wang (@jeffw16).
+The program and the image padding algorithm were originally written by Amit Joshi ([@amitjoshi24](https://github.com/amitjoshi24)). Code improvements were made by Jeffrey Wang ([@jeffw16](https://github.com/jeffw16)).
 
 ## Installation
 Python 3.4+ is required to run this.
