@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ImagePadder via PyScript</title>
-    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
-    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <title>Image Padder via PyScript</title>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2025.2.4/core.css">
+    <script type="module" src="https://pyscript.net/releases/2025.2.4/core.js"></script>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
         /* Basic styling for a clean, modern UI */
         body {
@@ -70,9 +71,9 @@
     </style>
     
     <!-- PyScript environment: load Pillow from PyPi -->
-    <py-env>
-        - pillow
-    </py-env>
+    <py-config>
+    packages = ["pillow"]
+    </py-config>
 </head>
 <body>
     <div class="container">
@@ -85,7 +86,7 @@
         <label for="aspect-ratio">Desired Aspect Ratio (e.g., 4x3):</label>
         <input type="text" id="aspect-ratio" placeholder="WIDTHxHEIGHT" value="4x3">
         
-        <button id="process-button" onclick="pyProcess()">Pad Image</button>
+        <button id="process-button">Pad Image</button>
         
         <div>
             <a id="download-link" style="display:none;" download="padded_image.png">Download Padded Image</a>
@@ -100,13 +101,14 @@
     </div>
 
     <py-script>
+from pyodide.ffi import create_proxy
 import io
 import math
 import base64
 from PIL import Image
 from js import document
 
-async def pyProcess():
+async def pyProcess(event=None):  # Accept the event argument
     # Clear previous error messages
     error_div = document.getElementById("error-message")
     error_div.innerHTML = ""
@@ -192,6 +194,9 @@ async def pyProcess():
     download_link.href = img_data
     download_link.style.display = "inline-block"
     download_link.innerHTML = "Download Padded Image"
+
+# Create a proxy for the PyScript function to ensure proper interaction
+document.getElementById("process-button").onclick = create_proxy(pyProcess)
     </py-script>
 </body>
-</html> 
+</html>
