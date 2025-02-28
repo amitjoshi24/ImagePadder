@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ImagePadder via PyScript</title>
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <style>
+        /* Basic styling for a clean, modern UI */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="file"],
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #3367D6;
+        }
+        .error {
+            color: red;
+            margin-bottom: 10px;
+        }
+        img {
+            max-width: 100%;
+            margin-top: 20px;
+        }
+        .credits {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+        }
+        .credits a {
+            color: #4285F4;
+            text-decoration: none;
+        }
+    </style>
+    
+    <!-- PyScript environment: load Pillow from PyPi -->
+    <py-env>
+        - pillow
+    </py-env>
+</head>
+<body>
+    <div class="container">
+        <h1>Image Padder</h1>
+        <div id="error-message" class="error"></div>
+        
+        <label for="file-input">Select Image:</label>
+        <input type="file" id="file-input" accept="image/*">
+
+        <label for="aspect-ratio">Desired Aspect Ratio (e.g., 4x3):</label>
+        <input type="text" id="aspect-ratio" placeholder="WIDTHxHEIGHT" value="4x3">
+        
+        <button id="process-button" onclick="pyProcess()">Pad Image</button>
+        
+        <div>
+            <a id="download-link" style="display:none;" download="padded_image.png">Download Padded Image</a>
+        </div>
+        
+        <img id="result-image" style="display:none;" />
+        
+        <div class="credits">
+            Credits: Amit Joshi (<a href="https://github.com/amitjoshi24" target="_blank">@amitjoshi24</a>) 
+            and Jeffrey Wang (<a href="https://github.com/jeffw16" target="_blank">@jeffw16</a>)
+        </div>
+    </div>
+
+    <py-script>
+import io
+import math
+import base64
+from PIL import Image
+from js import document
+
+async def pyProcess():
+    # Clear previous error messages
+    error_div = document.getElementById("error-message")
+    error_div.innerHTML = ""
+    
+    # Get the selected file from the file input element
+    file_input = document.getElementById("file-input")
+    if file_input.files.length == 0:
+        error_div.innerHTML = "Please select an image file."
+        return
+    file = file_input.files.item(0)
+    
+    # Read the file as bytes using file.arrayBuffer()
+    try:
+        data = await file.arrayBuffer()  # returns a promise; await it
+        image_bytes = bytes(bytearray(data.to_py()))
+    except Exception as e:
+        error_div.innerHTML = "Error reading file: " + str(e)
+        return
+    
+    # Open the image using Pillow from the bytes
+    try:
+        im = Image.open(io.BytesIO(image_bytes))
+    except Exception as e:
+        error_div.innerHTML = "Image cannot be opened. " + str(e)
+        return
+    
+    # Get and parse the aspect ratio input (e.g., "4x3")
+    aspect_ratio_input = document.getElementById("aspect-ratio").value
+    try:
+        nw, nh = tuple(int(num) for num in aspect_ratio_input.split('x'))
+    except Exception as e:
+        error_div.innerHTML = "Invalid aspect ratio. Must be in the format WIDTHxHEIGHT, e.g. 4x3."
+        return
+    
+    # Get the original image dimensions
+    width, height = im.size
+    
+    # Determine whether to pad vertically or horizontally
+    vertical_pad = (nw / nh) <= (width / height)
+    if vertical_pad:
+        new_width = width
+        new_height = int(math.ceil(width * nh / nw))
+    else:
+        new_width = int(math.ceil(height * nw / nh))
+        new_height = height
+    
+    # Create a new image with a white background. Support transparency if needed.
+    if im.mode in ("RGBA", "LA"):
+        background_color = (255, 255, 255, 255)
+    else:
+        background_color = (255, 255, 255)
+    result = Image.new(im.mode, (new_width, new_height), background_color)
+    
+    # Calculate paste offset to center the image
+    if vertical_pad:
+        offset = ((new_height - height) // 2)
+        result.paste(im, (0, offset))
+    else:
+        offset = ((new_width - width) // 2)
+        result.paste(im, (offset, 0))
+    
+    # Save the result image to a bytes buffer in PNG format
+    output_buffer = io.BytesIO()
+    try:
+        result.save(output_buffer, format="PNG")
+    except Exception as e:
+        error_div.innerHTML = "Error saving padded image: " + str(e)
+        return
+    
+    output_bytes = output_buffer.getvalue()
+    
+    # Encode the image to base64 so it can be embedded in the HTML
+    b64_str = base64.b64encode(output_bytes).decode("utf-8")
+    img_data = "data:image/png;base64," + b64_str
+    
+    # Display the padded image
+    result_img = document.getElementById("result-image")
+    result_img.src = img_data
+    result_img.style.display = "block"
+    
+    # Update the download link with the new image data
+    download_link = document.getElementById("download-link")
+    download_link.href = img_data
+    download_link.style.display = "inline-block"
+    download_link.innerHTML = "Download Padded Image"
+    </py-script>
+</body>
+</html> 
