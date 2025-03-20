@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="https://pyscript.net/releases/2025.2.4/core.css">
     <script type="module" src="https://pyscript.net/releases/2025.2.4/core.js"></script>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Basic styling for a clean, modern UI */
         body {
@@ -14,16 +15,40 @@
             margin: 20px;
         }
         .container {
-            max-width: 600px;
+            max-width: 1200px;
             margin: auto;
             background-color: #fff;
             padding: 20px;
             box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
             border-radius: 8px;
         }
+        .app-layout {
+            display: flex;
+            flex-direction: column;
+        }
+        @media (min-width: 768px) {
+            .app-layout {
+                flex-direction: row;
+                gap: 20px;
+            }
+            .controls-panel {
+                flex: 1;
+                max-width: 400px;
+                padding-right: 10px;
+                box-sizing: border-box;
+            }
+            .result-panel {
+                flex: 2;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+        }
         h1 {
             text-align: center;
             color: #333;
+            margin-bottom: 20px;
         }
         label {
             display: block;
@@ -37,6 +62,42 @@
             margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .color-picker-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .color-picker-container label {
+            margin-right: 10px;
+            margin-bottom: 0;
+        }
+        input[type="color"] {
+            height: 40px;
+            width: 60px;
+            padding: 2px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .color-preview {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+        .color-hex {
+            margin-left: 10px;
+            font-family: monospace;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            background-color: #f9f9f9;
+            box-sizing: border-box;
         }
         button {
             background-color: #4285F4;
@@ -46,6 +107,8 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
         }
         button:hover {
             background-color: #3367D6;
@@ -54,9 +117,75 @@
             color: red;
             margin-bottom: 10px;
         }
-        img {
-            max-width: 100%;
+        .result-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        .image-container {
+            position: relative;
             margin-top: 20px;
+            border-radius: 0.25rem;
+            overflow: hidden;
+            display: inline-block;
+            width: auto;
+            max-width: 100%;
+            text-align: center;
+        }
+        .image-wrapper {
+            display: inline-block;
+            position: relative;
+        }
+        .image-container img {
+            display: block;
+            max-width: 80vw;
+            max-height: 80vh;
+            object-fit: contain;
+            border: 1px solid #eee;
+        }
+        .download-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(128, 128, 128, 0.3) !important;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+            z-index: 10;
+            border-radius: 0.25rem;
+        }
+        .image-container:hover .download-overlay {
+            opacity: 1;
+        }
+        .download-icon {
+            color: white;
+            font-size: 32px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        .download-container {
+            text-align: center;
+            margin-top: 15px;
+        }
+        #download-link {
+            display: inline-block;
+            background-color: #34A853;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        #download-link:hover {
+            background-color: #2E8B57;
         }
         .credits {
             margin-top: 20px;
@@ -68,6 +197,54 @@
             color: #4285F4;
             text-decoration: none;
         }
+        .section-title {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            color: #555;
+        }
+        .placeholder-message {
+            text-align: center;
+            padding: 40px;
+            color: #777;
+            font-style: italic;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border: 1px dashed #ccc;
+        }
+        .aspect-ratio-hint {
+            font-size: 13px;
+            color: #666;
+            margin-top: -5px;
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+        /* Add loading spinner styles */
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            border: 0.25rem solid rgba(66, 133, 244, 0.3);
+            border-radius: 50%;
+            border-top-color: #4285F4;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            margin-top: 0.5rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
     </style>
     
     <!-- PyScript environment: load Pillow from PyPi -->
@@ -77,22 +254,54 @@
 </head>
 <body>
     <div class="container">
-        <h1>Image Padder</h1>
+        <h1><img src="favicon.ico" alt="Icon" style="height: 1.5em; width: auto; vertical-align: middle; margin-right: 0.5em;">Image Padder</h1>
         <div id="error-message" class="error"></div>
         
-        <label for="file-input">Select Image:</label>
-        <input type="file" id="file-input" accept="image/*">
+        <div class="app-layout">
+            <div class="controls-panel">
+                <div class="form-group">
+                    <h3 class="section-title">1. Select Image</h3>
+                    <label for="file-input">Choose an image file:</label>
+                    <input type="file" id="file-input" accept="image/*">
+                </div>
 
-        <label for="aspect-ratio">Desired Aspect Ratio (e.g., 4x3):</label>
-        <input type="text" id="aspect-ratio" placeholder="WIDTHxHEIGHT" value="4x3">
-        
-        <button id="process-button">Pad Image</button>
-        
-        <div>
-            <a id="download-link" style="display:none;" download="padded_image.png">Download Padded Image</a>
+                <div class="form-group">
+                    <h3 class="section-title">2. Set Parameters</h3>
+                    <label for="aspect-ratio">Desired Aspect Ratio:</label>
+                    <div class="aspect-ratio-hint">Format: width×height (e.g., 16×9, 4×3, 1×1)</div>
+                    <input type="text" id="aspect-ratio" placeholder="WIDTHxHEIGHT" value="4x3">
+                    
+                    <div class="color-picker-container">
+                        <label for="bg-color">Background Color:</label>
+                        <input type="color" id="bg-color" value="#FFFFFF">
+                        <div class="color-preview" id="color-preview" style="background-color: #FFFFFF;"></div>
+                        <span class="color-hex" id="color-hex">#FFFFFF</span>
+                    </div>
+                </div>
+                
+                <button id="process-button">Pad Image</button>
+                <div id="loading-spinner" class="loading-spinner">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Processing image...</div>
+                </div>
+            </div>
+            
+            <div class="result-panel">
+                <div id="result-placeholder" class="placeholder-message">
+                    <p>Your padded image will appear here</p>
+                    <p><i class="fas fa-image fa-3x"></i></p>
+                </div>
+                
+                <div id="image-container" class="image-container" style="display:none;">
+                    <div class="image-wrapper">
+                        <img id="result-image" />
+                        <a id="download-link" class="download-overlay" download="padded_image.png">
+                            <i class="fas fa-download download-icon"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-        
-        <img id="result-image" style="display:none;" />
         
         <div class="credits">
             Credits: Amit Joshi (<a href="https://github.com/amitjoshi24" target="_blank">@amitjoshi24</a>) 
@@ -108,7 +317,29 @@ import base64
 from PIL import Image
 from js import document
 
+# Function to update the color preview
+def update_color_preview(event=None):
+    color_input = document.getElementById("bg-color")
+    color_value = color_input.value
+    
+    # Update the preview box
+    preview = document.getElementById("color-preview")
+    preview.style.backgroundColor = color_value
+    
+    # Update the hex text
+    hex_text = document.getElementById("color-hex")
+    hex_text.innerHTML = color_value.upper()
+
+# Set up the color picker event listener
+document.getElementById("bg-color").addEventListener("input", create_proxy(update_color_preview))
+
+# Initialize the color preview
+update_color_preview()
+
 async def pyProcess(event=None):  # Accept the event argument
+    # Show loading spinner
+    document.getElementById("loading-spinner").style.display = "block"
+    
     # Clear previous error messages
     error_div = document.getElementById("error-message")
     error_div.innerHTML = ""
@@ -117,6 +348,7 @@ async def pyProcess(event=None):  # Accept the event argument
     file_input = document.getElementById("file-input")
     if file_input.files.length == 0:
         error_div.innerHTML = "Please select an image file."
+        document.getElementById("loading-spinner").style.display = "none"
         return
     file = file_input.files.item(0)
     
@@ -126,6 +358,7 @@ async def pyProcess(event=None):  # Accept the event argument
         image_bytes = bytes(bytearray(data.to_py()))
     except Exception as e:
         error_div.innerHTML = "Error reading file: " + str(e)
+        document.getElementById("loading-spinner").style.display = "none"
         return
     
     # Open the image using Pillow from the bytes
@@ -133,6 +366,7 @@ async def pyProcess(event=None):  # Accept the event argument
         im = Image.open(io.BytesIO(image_bytes))
     except Exception as e:
         error_div.innerHTML = "Image cannot be opened. " + str(e)
+        document.getElementById("loading-spinner").style.display = "none"
         return
     
     # Get and parse the aspect ratio input (e.g., "4x3")
@@ -141,7 +375,14 @@ async def pyProcess(event=None):  # Accept the event argument
         nw, nh = tuple(int(num) for num in aspect_ratio_input.split('x'))
     except Exception as e:
         error_div.innerHTML = "Invalid aspect ratio. Must be in the format WIDTHxHEIGHT, e.g. 4x3."
+        document.getElementById("loading-spinner").style.display = "none"
         return
+    
+    # Get the background color from the color picker
+    bg_color_hex = document.getElementById("bg-color").value
+    # Convert hex to RGB
+    bg_color_hex = bg_color_hex.lstrip('#')
+    bg_color_rgb = tuple(int(bg_color_hex[i:i+2], 16) for i in (0, 2, 4))
     
     # Get the original image dimensions
     width, height = im.size
@@ -155,11 +396,11 @@ async def pyProcess(event=None):  # Accept the event argument
         new_width = int(math.ceil(height * nw / nh))
         new_height = height
     
-    # Create a new image with a white background. Support transparency if needed.
+    # Create a new image with the selected background color. Support transparency if needed.
     if im.mode in ("RGBA", "LA"):
-        background_color = (255, 255, 255, 255)
+        background_color = bg_color_rgb + (255,)  # Add alpha channel
     else:
-        background_color = (255, 255, 255)
+        background_color = bg_color_rgb
     result = Image.new(im.mode, (new_width, new_height), background_color)
     
     # Calculate paste offset to center the image
@@ -176,6 +417,7 @@ async def pyProcess(event=None):  # Accept the event argument
         result.save(output_buffer, format="PNG")
     except Exception as e:
         error_div.innerHTML = "Error saving padded image: " + str(e)
+        document.getElementById("loading-spinner").style.display = "none"
         return
     
     output_bytes = output_buffer.getvalue()
@@ -184,16 +426,20 @@ async def pyProcess(event=None):  # Accept the event argument
     b64_str = base64.b64encode(output_bytes).decode("utf-8")
     img_data = "data:image/png;base64," + b64_str
     
+    # Hide loading spinner when done (whether successful or not)
+    document.getElementById("loading-spinner").style.display = "none"
+    
+    # Hide placeholder and show image container
+    document.getElementById("result-placeholder").style.display = "none"
+    document.getElementById("image-container").style.display = "block"
+    
     # Display the padded image
     result_img = document.getElementById("result-image")
     result_img.src = img_data
-    result_img.style.display = "block"
     
     # Update the download link with the new image data
     download_link = document.getElementById("download-link")
     download_link.href = img_data
-    download_link.style.display = "inline-block"
-    download_link.innerHTML = "Download Padded Image"
 
 # Create a proxy for the PyScript function to ensure proper interaction
 document.getElementById("process-button").onclick = create_proxy(pyProcess)
