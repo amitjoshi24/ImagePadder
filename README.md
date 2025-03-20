@@ -2,8 +2,9 @@ Amit Joshi's Image Padder pads images to be whatever aspect ratio you want while
 
 The program and the image padding algorithm were originally written by Amit Joshi ([@amitjoshi24](https://github.com/amitjoshi24)). Code improvements were made by Jeffrey Wang ([@jeffw16](https://github.com/jeffw16)).
 
-## Website
-[https://amitjoshi24.github.io/ImagePadder/]([https://github.com/amitjoshi24](https://amitjoshi24.github.io/ImagePadder/))
+## Website  
+[https://amitjoshi24.github.io/ImagePadder/](https://amitjoshi24.github.io/ImagePadder/)  
+
 
 ## Installation
 Python 3.4+ is required to run this.
