@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Padder</title>
     <link rel="stylesheet" href="https://pyscript.net/releases/2025.2.4/core.css">
     <script type="module" src="https://pyscript.net/releases/2025.2.4/core.js"></script>
@@ -25,6 +26,7 @@
         .app-layout {
             display: flex;
             flex-direction: column;
+            gap: 2rem;
         }
         @media (min-width: 768px) {
             .app-layout {
@@ -43,6 +45,7 @@
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
+                padding-top: 1rem;
             }
         }
         h1 {
@@ -223,7 +226,7 @@
         .loading-spinner {
             display: none;
             text-align: center;
-            margin-top: 15px;
+            margin: 1.5rem 0;
         }
         
         .spinner {
@@ -308,6 +311,27 @@
             and Jeffrey Wang (<a href="https://github.com/jeffw16" target="_blank">@jeffw16</a>)
         </div>
     </div>
+
+    <script>
+    // Add this at the beginning of your HTML body
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if we're on a mobile device
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile) {
+            const mobileWarning = document.createElement('div');
+            mobileWarning.style.padding = '10px';
+            mobileWarning.style.backgroundColor = '#FFF3CD';
+            mobileWarning.style.color = '#856404';
+            mobileWarning.style.borderRadius = '4px';
+            mobileWarning.style.margin = '10px 0';
+            mobileWarning.style.textAlign = 'center';
+            mobileWarning.innerHTML = 'For best experience, use a desktop browser. Mobile support is limited.';
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(mobileWarning, container.firstChild);
+        }
+    });
+    </script>
 
     <py-script>
 from pyodide.ffi import create_proxy
