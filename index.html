@@ -311,8 +311,8 @@
                     <h3 class="section-title">2. Set Parameters</h3>
                     
                     <div class="tabs">
-                        <div class="tab active" id="tab-aspect-ratio">Aspect Ratio</div>
-                        <div class="tab" id="tab-custom-padding">Custom Padding</div>
+                        <div class="tab active" id="tab-aspect-ratio" data-target="content-aspect-ratio">Aspect Ratio</div>
+                        <div class="tab" id="tab-custom-padding" data-target="content-custom-padding">Custom Padding</div>
                     </div>
                     
                     <div class="tab-content active" id="content-aspect-ratio">
@@ -383,24 +383,55 @@
     <script>
     // Add this at the beginning of your HTML body
     document.addEventListener('DOMContentLoaded', function() {
-        // Tab switching functionality
-        const tabs = document.querySelectorAll('.tab');
-        const tabContents = document.querySelectorAll('.tab-content');
+        // Add a flag to track if we're in the middle of a hack
+        let isHackInProgress = false;
         
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                // Remove active class from all tabs and contents
-                tabs.forEach(t => t.classList.remove('active'));
-                tabContents.forEach(c => c.classList.remove('active'));
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Get the target content ID from the data-target attribute
+                const targetId = this.getAttribute('data-target');
                 
-                // Add active class to clicked tab
-                tab.classList.add('active');
+                // Skip if we're in the middle of a hack and this is a simulated click
+                if (isHackInProgress && targetId === 'content-custom-padding') {
+                    return;
+                }
                 
-                // Show corresponding content
-                const contentId = 'content-' + tab.id.split('-')[1];
-                const contentElement = document.getElementById(contentId);
-                if (contentElement) {
-                    contentElement.classList.add('active');
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // Deactivate all tabs
+                document.querySelectorAll('.tab').forEach(t => {
+                    t.classList.remove('active');
+                });
+                
+                // Activate the clicked tab
+                this.classList.add('active');
+                
+                // Show the target content
+                document.getElementById(targetId).classList.add('active');
+                
+                // Hack for custom padding tab - if clicking on custom padding tab,
+                // simulate clicking aspect ratio tab and then back to custom padding
+                if (targetId === 'content-custom-padding' && !isHackInProgress) {
+                    // Set the flag to indicate we're in a hack
+                    isHackInProgress = true;
+                    
+                    // Only do this hack if this is the first click (not already active)
+                    const aspectRatioTab = document.querySelector('.tab[data-target="content-aspect-ratio"]');
+                    const customPaddingTab = this;
+                    
+                    // Click aspect ratio tab
+                    aspectRatioTab.click();
+                    
+                    // Then click back to custom padding tab after a short delay
+                    setTimeout(() => {
+                        customPaddingTab.click();
+                        // Reset the hack flag
+                        isHackInProgress = false;
+                    }, 10);
                 }
             });
         });
