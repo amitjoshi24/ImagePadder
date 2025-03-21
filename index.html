@@ -139,10 +139,11 @@
         .image-wrapper {
             display: inline-block;
             position: relative;
+            max-width: 100%;
         }
         .image-container img {
             display: block;
-            max-width: 80vw;
+            max-width: 100%;
             max-height: 80vh;
             object-fit: contain;
             border: 1px solid #eee;
@@ -248,6 +249,44 @@
             color: #666;
             font-size: 0.9rem;
         }
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background-color: #fff;
+            border-bottom: 1px solid #fff;
+            margin-bottom: -1px;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .padding-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .padding-inputs label {
+            margin-bottom: 3px;
+        }
+        .padding-inputs input {
+            width: 100%;
+        }
     </style>
     
     <!-- PyScript environment: load Pillow from PyPi -->
@@ -270,9 +309,38 @@
 
                 <div class="form-group">
                     <h3 class="section-title">2. Set Parameters</h3>
-                    <label for="aspect-ratio">Desired Aspect Ratio:</label>
-                    <div class="aspect-ratio-hint">Format: width×height (e.g., 16×9, 4×3, 1×1)</div>
-                    <input type="text" id="aspect-ratio" placeholder="WIDTHxHEIGHT" value="4x3">
+                    
+                    <div class="tabs">
+                        <div class="tab active" id="tab-aspect-ratio">Aspect Ratio</div>
+                        <div class="tab" id="tab-custom-padding">Custom Padding</div>
+                    </div>
+                    
+                    <div class="tab-content active" id="content-aspect-ratio">
+                        <label for="aspect-ratio">Desired Aspect Ratio:</label>
+                        <div class="aspect-ratio-hint">Format: width×height (e.g., 16×9, 4×3, 1×1)</div>
+                        <input type="text" id="aspect-ratio" placeholder="WIDTHxHEIGHT" value="4x3">
+                    </div>
+                    
+                    <div class="tab-content" id="content-custom-padding">
+                        <div class="padding-inputs">
+                            <div>
+                                <label for="padding-top">Top Padding (px):</label>
+                                <input type="number" id="padding-top" value="0" min="0">
+                            </div>
+                            <div>
+                                <label for="padding-right">Right Padding (px):</label>
+                                <input type="number" id="padding-right" value="0" min="0">
+                            </div>
+                            <div>
+                                <label for="padding-bottom">Bottom Padding (px):</label>
+                                <input type="number" id="padding-bottom" value="0" min="0">
+                            </div>
+                            <div>
+                                <label for="padding-left">Left Padding (px):</label>
+                                <input type="number" id="padding-left" value="0" min="0">
+                            </div>
+                        </div>
+                    </div>
                     
                     <div class="color-picker-container">
                         <label for="bg-color">Background Color:</label>
@@ -315,6 +383,28 @@
     <script>
     // Add this at the beginning of your HTML body
     document.addEventListener('DOMContentLoaded', function() {
+        // Tab switching functionality
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and contents
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Show corresponding content
+                const contentId = 'content-' + tab.id.split('-')[1];
+                const contentElement = document.getElementById(contentId);
+                if (contentElement) {
+                    contentElement.classList.add('active');
+                }
+            });
+        });
+        
         // Check if we're on a mobile device
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         if (isMobile) {
@@ -360,7 +450,7 @@ document.getElementById("bg-color").addEventListener("input", create_proxy(updat
 # Initialize the color preview
 update_color_preview()
 
-async def pyProcess(event=None):  # Accept the event argument
+async def pyProcess(event=None):
     # Show loading spinner
     document.getElementById("loading-spinner").style.display = "block"
     
@@ -378,7 +468,7 @@ async def pyProcess(event=None):  # Accept the event argument
     
     # Read the file as bytes using file.arrayBuffer()
     try:
-        data = await file.arrayBuffer()  # returns a promise; await it
+        data = await file.arrayBuffer()
         image_bytes = bytes(bytearray(data.to_py()))
     except Exception as e:
         error_div.innerHTML = "Error reading file: " + str(e)
@@ -393,47 +483,77 @@ async def pyProcess(event=None):  # Accept the event argument
         document.getElementById("loading-spinner").style.display = "none"
         return
     
-    # Get and parse the aspect ratio input (e.g., "4x3")
-    aspect_ratio_input = document.getElementById("aspect-ratio").value
-    try:
-        nw, nh = tuple(int(num) for num in aspect_ratio_input.split('x'))
-    except Exception as e:
-        error_div.innerHTML = "Invalid aspect ratio. Must be in the format WIDTHxHEIGHT, e.g. 4x3."
-        document.getElementById("loading-spinner").style.display = "none"
-        return
-    
     # Get the background color from the color picker
     bg_color_hex = document.getElementById("bg-color").value
     # Convert hex to RGB
     bg_color_hex = bg_color_hex.lstrip('#')
     bg_color_rgb = tuple(int(bg_color_hex[i:i+2], 16) for i in (0, 2, 4))
     
+    # Determine which mode is active
+    aspect_ratio_tab = document.getElementById("content-aspect-ratio")
+    is_aspect_ratio_mode = aspect_ratio_tab.classList.contains("active")
+    
     # Get the original image dimensions
     width, height = im.size
     
-    # Determine whether to pad vertically or horizontally
-    vertical_pad = (nw / nh) <= (width / height)
-    if vertical_pad:
-        new_width = width
-        new_height = int(math.ceil(width * nh / nw))
+    if is_aspect_ratio_mode:
+        # Aspect ratio mode
+        aspect_ratio_input = document.getElementById("aspect-ratio").value
+        try:
+            nw, nh = tuple(int(num) for num in aspect_ratio_input.split('x'))
+        except Exception as e:
+            error_div.innerHTML = "Invalid aspect ratio. Must be in the format WIDTHxHEIGHT, e.g. 4x3."
+            document.getElementById("loading-spinner").style.display = "none"
+            return
+        
+        # Determine whether to pad vertically or horizontally
+        vertical_pad = (nw / nh) <= (width / height)
+        if vertical_pad:
+            new_width = width
+            new_height = int(math.ceil(width * nh / nw))
+        else:
+            new_width = int(math.ceil(height * nw / nh))
+            new_height = height
+            
+        # Create a new image with the selected background color
+        if im.mode in ("RGBA", "LA"):
+            background_color = bg_color_rgb + (255,)  # Add alpha channel
+        else:
+            background_color = bg_color_rgb
+        result = Image.new(im.mode, (new_width, new_height), background_color)
+        
+        # Calculate paste offset to center the image
+        if vertical_pad:
+            offset = ((new_height - height) // 2)
+            result.paste(im, (0, offset))
+        else:
+            offset = ((new_width - width) // 2)
+            result.paste(im, (offset, 0))
     else:
-        new_width = int(math.ceil(height * nw / nh))
-        new_height = height
-    
-    # Create a new image with the selected background color. Support transparency if needed.
-    if im.mode in ("RGBA", "LA"):
-        background_color = bg_color_rgb + (255,)  # Add alpha channel
-    else:
-        background_color = bg_color_rgb
-    result = Image.new(im.mode, (new_width, new_height), background_color)
-    
-    # Calculate paste offset to center the image
-    if vertical_pad:
-        offset = ((new_height - height) // 2)
-        result.paste(im, (0, offset))
-    else:
-        offset = ((new_width - width) // 2)
-        result.paste(im, (offset, 0))
+        # Custom padding mode
+        try:
+            padding_top = int(document.getElementById("padding-top").value)
+            padding_right = int(document.getElementById("padding-right").value)
+            padding_bottom = int(document.getElementById("padding-bottom").value)
+            padding_left = int(document.getElementById("padding-left").value)
+        except Exception as e:
+            error_div.innerHTML = "Invalid padding values. Please enter positive numbers."
+            document.getElementById("loading-spinner").style.display = "none"
+            return
+            
+        # Calculate new dimensions
+        new_width = width + padding_left + padding_right
+        new_height = height + padding_top + padding_bottom
+        
+        # Create a new image with the selected background color
+        if im.mode in ("RGBA", "LA"):
+            background_color = bg_color_rgb + (255,)  # Add alpha channel
+        else:
+            background_color = bg_color_rgb
+        result = Image.new(im.mode, (new_width, new_height), background_color)
+        
+        # Paste the original image with the specified padding
+        result.paste(im, (padding_left, padding_top))
     
     # Save the result image to a bytes buffer in PNG format
     output_buffer = io.BytesIO()
@@ -467,6 +587,32 @@ async def pyProcess(event=None):  # Accept the event argument
 
 # Create a proxy for the PyScript function to ensure proper interaction
 document.getElementById("process-button").onclick = create_proxy(pyProcess)
+
+# Function to handle tab switching from PyScript
+def switch_tab(tab_id):
+    # Get all tabs and contents
+    tabs = document.querySelectorAll('.tab')
+    contents = document.querySelectorAll('.tab-content')
+    
+    # Remove active class from all
+    for i in range(tabs.length):
+        tabs[i].classList.remove('active')
+        
+    for i in range(contents.length):
+        contents[i].classList.remove('active')
+    
+    # Add active class to selected tab and content
+    selected_tab = document.getElementById('tab-' + tab_id)
+    selected_content = document.getElementById('content-' + tab_id)
+    
+    if selected_tab:
+        selected_tab.classList.add('active')
+    if selected_content:
+        selected_content.classList.add('active')
+
+# Add click handlers for tabs
+document.getElementById("tab-aspect-ratio").addEventListener("click", create_proxy(lambda e: switch_tab('aspect-ratio')))
+document.getElementById("tab-custom-padding").addEventListener("click", create_proxy(lambda e: switch_tab('custom-padding')))
     </py-script>
 </body>
 </html>
