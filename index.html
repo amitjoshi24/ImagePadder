@@ -376,7 +376,6 @@
         
         <div class="credits">
             Credits: Amit Joshi (<a href="https://github.com/amitjoshi24" target="_blank">@amitjoshi24</a>) 
-            and Jeffrey Wang (<a href="https://github.com/jeffw16" target="_blank">@jeffw16</a>)
         </div>
     </div>
 
@@ -386,58 +385,73 @@
         // Add a flag to track if we're in the middle of a hack
         let isHackInProgress = false;
         
-        // Tab switching
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                // Get the target content ID from the data-target attribute
-                const targetId = this.getAttribute('data-target');
-                
-                // Skip if we're in the middle of a hack and this is a simulated click
-                if (isHackInProgress && targetId === 'content-custom-padding') {
-                    return;
-                }
-                
-                // Hide all tab contents
-                document.querySelectorAll('.tab-content').forEach(content => {
-                    content.classList.remove('active');
-                });
-                
-                // Deactivate all tabs
-                document.querySelectorAll('.tab').forEach(t => {
-                    t.classList.remove('active');
-                });
-                
-                // Activate the clicked tab
-                this.classList.add('active');
-                
-                // Show the target content
-                document.getElementById(targetId).classList.add('active');
-                
-                // Hack for custom padding tab - if clicking on custom padding tab,
-                // simulate clicking aspect ratio tab and then back to custom padding
-                if (targetId === 'content-custom-padding' && !isHackInProgress) {
-                    // Set the flag to indicate we're in a hack
-                    isHackInProgress = true;
-                    
-                    // Only do this hack if this is the first click (not already active)
-                    const aspectRatioTab = document.querySelector('.tab[data-target="content-aspect-ratio"]');
-                    const customPaddingTab = this;
-                    
-                    // Click aspect ratio tab
-                    aspectRatioTab.click();
-                    
-                    // Then click back to custom padding tab after a short delay
-                    setTimeout(() => {
-                        customPaddingTab.click();
-                        // Reset the hack flag
-                        isHackInProgress = false;
-                    }, 10);
-                }
-            });
-        });
-        
         // Check if we're on a mobile device
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        
+        // Tab switching function that works for both click and touch
+        function switchTab(tab) {
+            // Get the target content ID from the data-target attribute
+            const targetId = tab.getAttribute('data-target');
+            
+            // Skip if we're in the middle of a hack and this is a simulated click
+            if (isHackInProgress && targetId === 'content-custom-padding') {
+                return;
+            }
+            
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Deactivate all tabs
+            document.querySelectorAll('.tab').forEach(t => {
+                t.classList.remove('active');
+            });
+            
+            // Activate the clicked tab
+            tab.classList.add('active');
+            
+            // Show the target content
+            document.getElementById(targetId).classList.add('active');
+            
+            // Only run the hack if not on mobile and it's the custom padding tab
+            if (!isMobile && targetId === 'content-custom-padding' && !isHackInProgress) {
+                // Set the flag to indicate we're in a hack
+                isHackInProgress = true;
+                
+                // Get the aspect ratio tab
+                const aspectRatioTab = document.querySelector('.tab[data-target="content-aspect-ratio"]');
+                const customPaddingTab = tab;
+                
+                // Click aspect ratio tab
+                switchTab(aspectRatioTab);
+                
+                // Then switch back to custom padding tab after a short delay
+                setTimeout(() => {
+                    switchTab(customPaddingTab);
+                    // Reset the hack flag
+                    isHackInProgress = false;
+                }, 10);
+            }
+        }
+        
+        // Add click event listeners to tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            // For mouse clicks
+            tab.addEventListener('click', function() {
+                switchTab(this);
+            });
+            
+            // For touch events on mobile
+            if (isMobile) {
+                tab.addEventListener('touchend', function(e) {
+                    e.preventDefault(); // Prevent default touch behavior
+                    switchTab(this);
+                });
+            }
+        });
+        
+        // Rest of your mobile warning code
         if (isMobile) {
             const mobileWarning = document.createElement('div');
             mobileWarning.style.padding = '10px';
