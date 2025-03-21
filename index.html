@@ -287,6 +287,31 @@
         .padding-inputs input {
             width: 100%;
         }
+        /* Updated padding inputs style for vertical layout */
+        .padding-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .padding-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .padding-row label {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .padding-row input {
+            width: 80px;
+            height: 30px;
+            font-size: 16px;
+            text-align: center;
+        }
     </style>
     
     <!-- PyScript environment: load Pillow from PyPi -->
@@ -322,20 +347,20 @@
                     </div>
                     
                     <div class="tab-content" id="content-custom-padding">
-                        <div class="padding-inputs">
-                            <div>
+                        <div class="padding-vertical">
+                            <div class="padding-row">
                                 <label for="padding-top">Top Padding (px):</label>
                                 <input type="number" id="padding-top" value="0" min="0">
                             </div>
-                            <div>
+                            <div class="padding-row">
                                 <label for="padding-right">Right Padding (px):</label>
                                 <input type="number" id="padding-right" value="0" min="0">
                             </div>
-                            <div>
+                            <div class="padding-row">
                                 <label for="padding-bottom">Bottom Padding (px):</label>
                                 <input type="number" id="padding-bottom" value="0" min="0">
                             </div>
-                            <div>
+                            <div class="padding-row">
                                 <label for="padding-left">Left Padding (px):</label>
                                 <input type="number" id="padding-left" value="0" min="0">
                             </div>
