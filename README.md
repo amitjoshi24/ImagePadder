@@ -1,11 +1,11 @@
-Amit Joshi's Image Padder pads images to be whatever aspect ratio you want while keeping preserving the original resolution. A suffix `-padded_WxH` is added to the resulting file.
+Amit Joshi's Image Padder pads images to be whatever aspect ratio (or does custom padding on website) you want while keeping preserving the original resolution. A suffix `-padded_WxH` is added to the resulting file.
 
 The program and the image padding algorithm were originally written by Amit Joshi ([@amitjoshi24](https://github.com/amitjoshi24)). Code improvements were made by Jeffrey Wang ([@jeffw16](https://github.com/jeffw16)).
 
 ## Website  
 [https://amitjoshi24.github.io/ImagePadder/](https://amitjoshi24.github.io/ImagePadder/)  
 
-Easiest to use the website above!
+Easiest to use the website above, as it also has a custom padding option
 
 
 ## Installation
