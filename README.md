@@ -5,6 +5,8 @@ The program and the image padding algorithm were originally written by Amit Josh
 ## Website  
 [https://amitjoshi24.github.io/ImagePadder/](https://amitjoshi24.github.io/ImagePadder/)  
 
+Easiest to use the website above!
+
 
 ## Installation
 Python 3.4+ is required to run this.
