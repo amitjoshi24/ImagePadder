@@ -349,6 +349,60 @@
             font-style: italic;
             margin-left: 22px;
         }
+        /* Donation section styling */
+        .donation-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #eee;
+        }
+        
+        .donation-title {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        
+        .donation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .donation-button {
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+        
+        .donation-button:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+        
+        .donation-button i {
+            margin-right: 8px;
+        }
+        
+        .paypal-button {
+            background-color: #0070ba;
+        }
+        
+        .venmo-button {
+            background-color: #008CFF;
+        }
+        
+        .ko-fi-button {
+            background-color: #FF5E5B;
+        }
     </style>
     
     <!-- PyScript environment: load Pillow from PyPi -->
@@ -442,6 +496,18 @@
                         </a>
                     </div>
                 </div>
+            </div>
+        </div>
+        
+        <div class="donation-section">
+            <div class="donation-title">Find this tool useful? Consider supporting the development!</div>
+            <div class="donation-buttons">
+                <a href="https://paypal.me/amitjoshi168" target="_blank" class="donation-button paypal-button">
+                    <i class="fab fa-paypal"></i> PayPal
+                </a>
+                <a href="https://venmo.com/Amit-Joshi-11" target="_blank" class="donation-button venmo-button">
+                    <i class="fab fa-vimeo-v"></i> Venmo
+                </a>
             </div>
         </div>
         
