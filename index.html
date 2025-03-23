@@ -83,6 +83,19 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             cursor: pointer;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+        input[type="color"]:hover {
+            box-shadow: 0 0 8px rgba(0,0,0,0.2);
+            transform: scale(1.05);
+        }
+        .color-picker-hint {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+            font-style: italic;
         }
         .color-preview {
             width: 40px;
@@ -312,6 +325,30 @@
             font-size: 16px;
             text-align: center;
         }
+        /* Add this CSS for the transparency checkbox */
+        .transparency-option {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .transparency-option input[type="checkbox"] {
+            margin-right: 8px;
+            width: auto;
+        }
+
+        .transparency-option label {
+            display: inline;
+            margin-bottom: 0;
+        }
+
+        .transparency-hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+            font-style: italic;
+            margin-left: 22px;
+        }
     </style>
     
     <!-- PyScript environment: load Pillow from PyPi -->
@@ -368,11 +405,20 @@
                     </div>
                     
                     <div class="color-picker-container">
-                        <label for="bg-color">Background Color:</label>
-                        <input type="color" id="bg-color" value="#FFFFFF">
+                        <div>
+                            <label for="bg-color">Background Color:</label>
+                            <span class="color-picker-hint">Click rectangle to open color selector</span>
+                        </div>
+                        <input type="color" id="bg-color" value="#FFFFFF" title="Click to open color picker">
                         <div class="color-preview" id="color-preview" style="background-color: #FFFFFF;"></div>
                         <span class="color-hex" id="color-hex">#FFFFFF</span>
                     </div>
+
+                    <div class="transparency-option">
+                        <input type="checkbox" id="transparent-bg">
+                        <label for="transparent-bg">Use transparent background</label>
+                    </div>
+                    <div class="transparency-hint">Color picker will be ignored if this is checked</div>
                 </div>
                 
                 <button id="process-button">Pad Image</button>
@@ -491,6 +537,50 @@
             const container = document.querySelector('.container');
             container.insertBefore(mobileWarning, container.firstChild);
         }
+
+        // Function to toggle color picker status based on transparency checkbox
+        function toggleColorPickerStatus() {
+            const transparentCheckbox = document.getElementById('transparent-bg');
+            const colorInput = document.getElementById('bg-color');
+            const colorPreview = document.getElementById('color-preview');
+            const colorHex = document.getElementById('color-hex');
+            const colorPickerHint = document.querySelector('.color-picker-hint');
+            const colorLabel = document.querySelector('.color-picker-container label');
+            
+            if (transparentCheckbox.checked) {
+                // Grey out color picker when transparent is checked
+                colorInput.style.opacity = '0.5';
+                colorPreview.style.opacity = '0.5';
+                colorHex.style.opacity = '0.5';
+                colorPickerHint.style.opacity = '0.5';
+                colorLabel.style.opacity = '0.5';
+                // Don't disable pointer events on the color input itself
+            } else {
+                // Restore color picker when transparent is unchecked
+                colorInput.style.opacity = '1';
+                colorPreview.style.opacity = '1';
+                colorHex.style.opacity = '1';
+                colorPickerHint.style.opacity = '1';
+                colorLabel.style.opacity = '1';
+            }
+        }
+        
+        // Add event listener to transparent checkbox
+        const transparentCheckbox = document.getElementById('transparent-bg');
+        transparentCheckbox.addEventListener('change', toggleColorPickerStatus);
+        
+        // Add event listener to color picker to uncheck transparency
+        const colorInput = document.getElementById('bg-color');
+        colorInput.addEventListener('click', function() {
+            const transparentCheckbox = document.getElementById('transparent-bg');
+            if (transparentCheckbox.checked) {
+                transparentCheckbox.checked = false;
+                toggleColorPickerStatus();
+            }
+        });
+        
+        // Initialize the color picker status
+        toggleColorPickerStatus();
     });
     </script>
 
@@ -554,6 +644,9 @@ async def pyProcess(event=None):
         document.getElementById("loading-spinner").style.display = "none"
         return
     
+    # Check if transparent background is selected
+    use_transparent_bg = document.getElementById("transparent-bg").checked
+    
     # Get the background color from the color picker
     bg_color_hex = document.getElementById("bg-color").value
     # Convert hex to RGB
@@ -586,12 +679,21 @@ async def pyProcess(event=None):
             new_width = int(math.ceil(height * nw / nh))
             new_height = height
             
-        # Create a new image with the selected background color
-        if im.mode in ("RGBA", "LA"):
-            background_color = bg_color_rgb + (255,)  # Add alpha channel
+        # When creating the new image, handle transparency if selected
+        if use_transparent_bg:
+            # Force RGBA mode for transparency
+            if im.mode != "RGBA":
+                im = im.convert("RGBA")
+            # Use transparent background
+            background_color = (255, 255, 255, 0)  # Fully transparent
+            result = Image.new("RGBA", (new_width, new_height), background_color)
         else:
-            background_color = bg_color_rgb
-        result = Image.new(im.mode, (new_width, new_height), background_color)
+            # Use selected background color
+            if im.mode in ("RGBA", "LA"):
+                background_color = bg_color_rgb + (255,)  # Add alpha channel
+            else:
+                background_color = bg_color_rgb
+            result = Image.new(im.mode, (new_width, new_height), background_color)
         
         # Calculate paste offset to center the image
         if vertical_pad:
@@ -616,12 +718,21 @@ async def pyProcess(event=None):
         new_width = width + padding_left + padding_right
         new_height = height + padding_top + padding_bottom
         
-        # Create a new image with the selected background color
-        if im.mode in ("RGBA", "LA"):
-            background_color = bg_color_rgb + (255,)  # Add alpha channel
+        # When creating the new image, handle transparency if selected
+        if use_transparent_bg:
+            # Force RGBA mode for transparency
+            if im.mode != "RGBA":
+                im = im.convert("RGBA")
+            # Use transparent background
+            background_color = (255, 255, 255, 0)  # Fully transparent
+            result = Image.new("RGBA", (new_width, new_height), background_color)
         else:
-            background_color = bg_color_rgb
-        result = Image.new(im.mode, (new_width, new_height), background_color)
+            # Use selected background color
+            if im.mode in ("RGBA", "LA"):
+                background_color = bg_color_rgb + (255,)  # Add alpha channel
+            else:
+                background_color = bg_color_rgb
+            result = Image.new(im.mode, (new_width, new_height), background_color)
         
         # Paste the original image with the specified padding
         result.paste(im, (padding_left, padding_top))
