@@ -236,7 +236,7 @@
             margin-bottom: 8px;
             font-style: italic;
         }
-        /* Add loading spinner styles */
+        /* Prominent loading spinner styles */
         .loading-spinner {
             display: none;
             text-align: center;
@@ -251,10 +251,6 @@
             border-radius: 50%;
             border-top-color: #4285F4;
             animation: spin 1s ease-in-out infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
         }
         
         .loading-text {
@@ -546,6 +542,11 @@
             font-size: 24px;
             font-weight: bold;
             margin: 0 5px;
+        }
+
+        /* Fix the spinner animation */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
     
@@ -907,6 +908,26 @@
             aspectRatioPreset.value = "custom";
         }
     });
+
+    // Direct approach to spinner management
+    document.addEventListener('DOMContentLoaded', function() {
+        // Clear any existing click handlers on the process button
+        const processButton = document.getElementById('process-button');
+        const newProcessButton = processButton.cloneNode(true);
+        processButton.parentNode.replaceChild(newProcessButton, processButton);
+        
+        // Add our clean click handler
+        newProcessButton.addEventListener('click', function() {
+            console.log("Process button clicked - showing spinner");
+            document.getElementById('loading-spinner').style.display = 'block';
+        });
+        
+        // Expose a global function to hide the spinner
+        window.hideSpinner = function() {
+            console.log("Hiding spinner");
+            document.getElementById('loading-spinner').style.display = 'none';
+        };
+    });
     </script>
 
     <py-script>
@@ -915,7 +936,7 @@ import io
 import math
 import base64
 from PIL import Image, ExifTags
-from js import document
+from js import document, window
 
 # Function to update the color preview
 def update_color_preview(event=None):
@@ -978,164 +999,167 @@ def apply_exif_orientation(image):
         return image
 
 async def pyProcess(event=None):
-    # Show loading spinner
-    document.getElementById("loading-spinner").style.display = "block"
+    # Import js at the beginning of the function to ensure it's available throughout
+    from js import document, window
     
-    # Clear previous error messages
-    error_div = document.getElementById("error-message")
-    error_div.innerHTML = ""
-    
-    # Get the selected file from the file input element
-    file_input = document.getElementById("file-input")
-    if file_input.files.length == 0:
-        error_div.innerHTML = "Please select an image file."
-        document.getElementById("loading-spinner").style.display = "none"
-        return
-    file = file_input.files.item(0)
-    
-    # Read the file as bytes using file.arrayBuffer()
     try:
-        data = await file.arrayBuffer()
-        image_bytes = bytes(bytearray(data.to_py()))
-    except Exception as e:
-        error_div.innerHTML = "Error reading file: " + str(e)
-        document.getElementById("loading-spinner").style.display = "none"
-        return
-    
-    # Open the image using Pillow from the bytes
-    try:
-        im = Image.open(io.BytesIO(image_bytes))
-        # Apply EXIF orientation correction
-        im = apply_exif_orientation(im)
-    except Exception as e:
-        error_div.innerHTML = "Image cannot be opened. " + str(e)
-        document.getElementById("loading-spinner").style.display = "none"
-        return
-    
-    # Check if transparent background is selected
-    use_transparent_bg = document.getElementById("transparent-bg").checked
-    opacity_value = int(document.getElementById("opacity-slider").value) if use_transparent_bg else 255
-    alpha_value = int(opacity_value * 2.55)  # Convert 0-100 to 0-255
-    
-    # Get the background color from the color picker
-    bg_color_hex = document.getElementById("bg-color").value
-    # Convert hex to RGB
-    bg_color_hex = bg_color_hex.lstrip('#')
-    bg_color_rgb = tuple(int(bg_color_hex[i:i+2], 16) for i in (0, 2, 4))
-    
-    # Determine which mode is active
-    aspect_ratio_tab = document.getElementById("content-aspect-ratio")
-    is_aspect_ratio_mode = aspect_ratio_tab.classList.contains("active")
-    
-    # Get the original image dimensions
-    width, height = im.size
-    
-    if is_aspect_ratio_mode:
-        # Aspect ratio mode
-        aspect_ratio_input = document.getElementById("aspect-ratio").value
+        # Clear previous error messages
+        error_div = document.getElementById("error-message")
+        error_div.innerHTML = ""
+        
+        # Get the selected file from the file input element
+        file_input = document.getElementById("file-input")
+        if file_input.files.length == 0:
+            error_div.innerHTML = "Please select an image file."
+            return
+        file = file_input.files.item(0)
+        
+        # Read the file as bytes using file.arrayBuffer()
         try:
-            nw, nh = tuple(int(num) for num in aspect_ratio_input.split('x'))
+            data = await file.arrayBuffer()
+            image_bytes = bytes(bytearray(data.to_py()))
         except Exception as e:
-            error_div.innerHTML = "Invalid aspect ratio. Must be in the format WIDTHxHEIGHT, e.g. 4x3."
-            document.getElementById("loading-spinner").style.display = "none"
+            error_div.innerHTML = "Error reading file: " + str(e)
             return
         
-        # Determine whether to pad vertically or horizontally
-        vertical_pad = (nw / nh) <= (width / height)
-        if vertical_pad:
-            new_width = width
-            new_height = int(math.ceil(width * nh / nw))
-        else:
-            new_width = int(math.ceil(height * nw / nh))
-            new_height = height
-            
-        # When creating the new image, handle transparency if selected
-        if use_transparent_bg:
-            # Force RGBA mode for transparency
-            if im.mode != "RGBA":
-                im = im.convert("RGBA")
-            # Use background with selected opacity
-            background_color = bg_color_rgb + (alpha_value,)  # Use the calculated alpha value
-            result = Image.new("RGBA", (new_width, new_height), background_color)
-        else:
-            # Use selected background color
-            if im.mode in ("RGBA", "LA"):
-                background_color = bg_color_rgb + (255,)  # Add alpha channel
-            else:
-                background_color = bg_color_rgb
-            result = Image.new(im.mode, (new_width, new_height), background_color)
-        
-        # Calculate paste offset to center the image
-        if vertical_pad:
-            offset = ((new_height - height) // 2)
-            result.paste(im, (0, offset))
-        else:
-            offset = ((new_width - width) // 2)
-            result.paste(im, (offset, 0))
-    else:
-        # Custom padding mode
+        # Open the image using Pillow from the bytes
         try:
-            padding_top = int(document.getElementById("padding-top").value)
-            padding_right = int(document.getElementById("padding-right").value)
-            padding_bottom = int(document.getElementById("padding-bottom").value)
-            padding_left = int(document.getElementById("padding-left").value)
+            im = Image.open(io.BytesIO(image_bytes))
+            # Apply EXIF orientation correction
+            im = apply_exif_orientation(im)
         except Exception as e:
-            error_div.innerHTML = "Invalid padding values. Please enter positive numbers."
-            document.getElementById("loading-spinner").style.display = "none"
+            error_div.innerHTML = "Image cannot be opened. " + str(e)
             return
+        
+        # Check if transparent background is selected
+        use_transparent_bg = document.getElementById("transparent-bg").checked
+        opacity_value = int(document.getElementById("opacity-slider").value) if use_transparent_bg else 255
+        alpha_value = int(opacity_value * 2.55)  # Convert 0-100 to 0-255
+        
+        # Get the background color from the color picker
+        bg_color_hex = document.getElementById("bg-color").value
+        # Convert hex to RGB
+        bg_color_hex = bg_color_hex.lstrip('#')
+        bg_color_rgb = tuple(int(bg_color_hex[i:i+2], 16) for i in (0, 2, 4))
+        
+        # Determine which mode is active
+        aspect_ratio_tab = document.getElementById("content-aspect-ratio")
+        is_aspect_ratio_mode = aspect_ratio_tab.classList.contains("active")
+        
+        # Get the original image dimensions
+        width, height = im.size
+        
+        if is_aspect_ratio_mode:
+            # Aspect ratio mode
+            aspect_ratio_input = document.getElementById("aspect-ratio").value
+            try:
+                nw, nh = tuple(int(num) for num in aspect_ratio_input.split('x'))
+            except Exception as e:
+                error_div.innerHTML = "Invalid aspect ratio. Must be in the format WIDTHxHEIGHT, e.g. 4x3."
+                return
             
-        # Calculate new dimensions
-        new_width = width + padding_left + padding_right
-        new_height = height + padding_top + padding_bottom
-        
-        # When creating the new image, handle transparency if selected
-        if use_transparent_bg:
-            # Force RGBA mode for transparency
-            if im.mode != "RGBA":
-                im = im.convert("RGBA")
-            # Use background with selected opacity
-            background_color = bg_color_rgb + (alpha_value,)  # Use the calculated alpha value
-            result = Image.new("RGBA", (new_width, new_height), background_color)
-        else:
-            # Use selected background color
-            if im.mode in ("RGBA", "LA"):
-                background_color = bg_color_rgb + (255,)  # Add alpha channel
+            # Determine whether to pad vertically or horizontally
+            vertical_pad = (nw / nh) <= (width / height)
+            if vertical_pad:
+                new_width = width
+                new_height = int(math.ceil(width * nh / nw))
             else:
-                background_color = bg_color_rgb
-            result = Image.new(im.mode, (new_width, new_height), background_color)
+                new_width = int(math.ceil(height * nw / nh))
+                new_height = height
+            
+            # When creating the new image, handle transparency if selected
+            if use_transparent_bg:
+                # Force RGBA mode for transparency
+                if im.mode != "RGBA":
+                    im = im.convert("RGBA")
+                # Use background with selected opacity
+                background_color = bg_color_rgb + (alpha_value,)  # Use the calculated alpha value
+                result = Image.new("RGBA", (new_width, new_height), background_color)
+            else:
+                # Use selected background color
+                if im.mode in ("RGBA", "LA"):
+                    background_color = bg_color_rgb + (255,)  # Add alpha channel
+                else:
+                    background_color = bg_color_rgb
+                result = Image.new(im.mode, (new_width, new_height), background_color)
+            
+            # Calculate paste offset to center the image
+            if vertical_pad:
+                offset = ((new_height - height) // 2)
+                result.paste(im, (0, offset))
+            else:
+                offset = ((new_width - width) // 2)
+                result.paste(im, (offset, 0))
+        else:
+            # Custom padding mode
+            try:
+                padding_top = int(document.getElementById("padding-top").value)
+                padding_right = int(document.getElementById("padding-right").value)
+                padding_bottom = int(document.getElementById("padding-bottom").value)
+                padding_left = int(document.getElementById("padding-left").value)
+            except Exception as e:
+                error_div.innerHTML = "Invalid padding values. Please enter positive numbers."
+                return
+            
+            # Calculate new dimensions
+            new_width = width + padding_left + padding_right
+            new_height = height + padding_top + padding_bottom
+            
+            # When creating the new image, handle transparency if selected
+            if use_transparent_bg:
+                # Force RGBA mode for transparency
+                if im.mode != "RGBA":
+                    im = im.convert("RGBA")
+                # Use background with selected opacity
+                background_color = bg_color_rgb + (alpha_value,)  # Use the calculated alpha value
+                result = Image.new("RGBA", (new_width, new_height), background_color)
+            else:
+                # Use selected background color
+                if im.mode in ("RGBA", "LA"):
+                    background_color = bg_color_rgb + (255,)  # Add alpha channel
+                else:
+                    background_color = bg_color_rgb
+                result = Image.new(im.mode, (new_width, new_height), background_color)
+            
+            # Paste the original image with the specified padding
+            result.paste(im, (padding_left, padding_top))
         
-        # Paste the original image with the specified padding
-        result.paste(im, (padding_left, padding_top))
-    
-    # Save the result image to a bytes buffer in PNG format
-    output_buffer = io.BytesIO()
-    try:
-        result.save(output_buffer, format="PNG")
+        # Save the result image to a bytes buffer in PNG format
+        output_buffer = io.BytesIO()
+        try:
+            result.save(output_buffer, format="PNG")
+        except Exception as e:
+            error_div.innerHTML = "Error saving padded image: " + str(e)
+            return
+        
+        output_bytes = output_buffer.getvalue()
+        
+        # Encode the image to base64 so it can be embedded in the HTML
+        b64_str = base64.b64encode(output_bytes).decode("utf-8")
+        img_data = "data:image/png;base64," + b64_str
+        
+        # Hide loading spinner when done (whether successful or not)
+        window.hideSpinner()
+        
+        # Hide placeholder and show image container
+        document.getElementById("result-placeholder").style.display = "none"
+        document.getElementById("image-container").style.display = "block"
+        
+        # Display the padded image
+        result_img = document.getElementById("result-image")
+        result_img.src = img_data
+        
+        # Update the download link with the new image data
+        download_link = document.getElementById("download-link")
+        download_link.href = img_data
+
     except Exception as e:
-        error_div.innerHTML = "Error saving padded image: " + str(e)
-        document.getElementById("loading-spinner").style.display = "none"
-        return
-    
-    output_bytes = output_buffer.getvalue()
-    
-    # Encode the image to base64 so it can be embedded in the HTML
-    b64_str = base64.b64encode(output_bytes).decode("utf-8")
-    img_data = "data:image/png;base64," + b64_str
-    
-    # Hide loading spinner when done (whether successful or not)
-    document.getElementById("loading-spinner").style.display = "none"
-    
-    # Hide placeholder and show image container
-    document.getElementById("result-placeholder").style.display = "none"
-    document.getElementById("image-container").style.display = "block"
-    
-    # Display the padded image
-    result_img = document.getElementById("result-image")
-    result_img.src = img_data
-    
-    # Update the download link with the new image data
-    download_link = document.getElementById("download-link")
-    download_link.href = img_data
+        print(f"Python error: {e}")
+        error_div.innerHTML = "Error processing image: " + str(e)
+        
+    finally:
+        # We already imported window at the beginning, so no need to import again
+        window.hideSpinner()
 
 # Create a proxy for the PyScript function to ensure proper interaction
 document.getElementById("process-button").onclick = create_proxy(pyProcess)
