@@ -900,7 +900,11 @@
         ratioHeight.addEventListener('input', updateCustomRatio);
 
         function updateCustomRatio() {
+            // Update the hidden aspect ratio field
             document.getElementById('aspect-ratio').value = ratioWidth.value + 'x' + ratioHeight.value;
+            
+            // Set the dropdown to "Custom" when manually changing width/height
+            aspectRatioPreset.value = "custom";
         }
     });
     </script>
