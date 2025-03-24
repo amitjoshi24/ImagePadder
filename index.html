@@ -881,10 +881,15 @@
         // Handle preset selection
         aspectRatioPreset.addEventListener('change', function() {
             if (this.value === 'custom') {
-                customRatioInputs.style.display = 'block';
+                // Don't change the width/height fields for custom option
             } else {
-                customRatioInputs.style.display = 'none';
+                // Parse the selected ratio (e.g., "16:9")
                 const [width, height] = this.value.split(':');
+                
+                // Update the width and height input fields
+                ratioWidth.value = width;
+                ratioHeight.value = height;
+                
                 // Update the hidden input used by the processing code
                 document.getElementById('aspect-ratio').value = width + 'x' + height;
             }
