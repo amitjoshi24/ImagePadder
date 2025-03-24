@@ -459,6 +459,94 @@
             color: #999;
             font-style: italic;
         }
+        /* Add this CSS for the opacity slider */
+        .opacity-control {
+            margin-top: 10px;
+            margin-left: 22px;
+            display: none; /* Hidden by default */
+        }
+
+        .opacity-slider-container {
+            display: flex;
+            align-items: center;
+            margin-top: 5px;
+            gap: 10px;
+        }
+
+        .opacity-slider {
+            flex: 1;
+        }
+
+        .opacity-value {
+            width: 40px;
+            text-align: center;
+            font-family: monospace;
+        }
+
+        /* Add CSS to make the checkbox larger and more mobile-friendly */
+        #transparent-bg {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+            accent-color: #4285F4;
+        }
+
+        /* Make the label for the checkbox larger too for better touch targets */
+        .transparency-option label {
+            font-size: 16px;
+            padding: 5px 0;
+            cursor: pointer;
+        }
+
+        /* Improve touch area */
+        .transparency-option {
+            padding: 5px 0;
+        }
+        /* Update aspect ratio selection styling */
+        .aspect-ratio-selection {
+            margin-top: 15px;
+        }
+
+        .aspect-ratio-preset {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fff;
+            font-size: 16px;
+        }
+
+        .custom-ratio-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .ratio-label {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 0;
+            margin-right: 5px;
+        }
+
+        .ratio-input {
+            width: 60px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .ratio-separator {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 5px;
+        }
     </style>
     
     <!-- PyScript environment: load Pillow from PyPi -->
@@ -493,9 +581,31 @@
                     </div>
                     
                     <div class="tab-content active" id="content-aspect-ratio">
-                        <label for="aspect-ratio">Desired Aspect Ratio:</label>
-                        <div class="aspect-ratio-hint">Format: width×height (e.g., 16×9, 4×3, 1×1)</div>
-                        <input type="text" id="aspect-ratio" placeholder="WIDTHxHEIGHT" value="4x3">
+                        <!-- Simplified aspect ratio fields -->
+                        <div class="custom-ratio-container">
+                            <label for="ratio-width" class="ratio-label">width:height</label>
+                            <input type="number" id="ratio-width" min="1" value="1" class="ratio-input" style="text-align: center;">
+                            <div class="ratio-separator">:</div>
+                            <input type="number" id="ratio-height" min="1" value="1" class="ratio-input" style="text-align: center;">
+                        </div>
+                        
+                        <!-- Secondary preset dropdown -->
+                        <div class="aspect-ratio-selection">
+                            <label for="aspect-ratio-preset">Or choose a common ratio:</label>
+                            <select id="aspect-ratio-preset" class="aspect-ratio-preset">
+                                <option value="custom" selected>Custom</option>
+                                <option value="16:9">16:9 (Widescreen)</option>
+                                <option value="4:3">4:3 (Standard)</option>
+                                <option value="1:1">1:1 (Square)</option>
+                                <option value="3:2">3:2 (Classic Photo)</option>
+                                <option value="21:9">21:9 (Ultrawide)</option>
+                                <option value="9:16">9:16 (Vertical Video)</option>
+                                <option value="2:3">2:3 (Portrait Photo)</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Hidden field for compatibility with existing code -->
+                        <input type="hidden" id="aspect-ratio" value="1x1">
                     </div>
                     
                     <div class="tab-content" id="content-custom-padding">
@@ -529,11 +639,24 @@
                         <span class="color-hex" id="color-hex">#FFFFFF</span>
                     </div>
 
-                    <div class="transparency-option">
-                        <input type="checkbox" id="transparent-bg">
-                        <label for="transparent-bg">Use transparent background</label>
+                    <!-- Replace the transparency checkbox and opacity control with just opacity control -->
+                    <div class="opacity-control" style="display:block; margin-top: 15px; margin-left: 0;">
+                        <div class="transparency-option" style="margin-left: 0; margin-bottom: 10px;">
+                            <input type="checkbox" id="transparent-bg">
+                            <label for="transparent-bg">Fully transparent background (0% opacity)</label>
+                        </div>
+                        
+                        <div style="display: flex; align-items: center;">
+                            <label for="opacity-slider"><strong>Adjust Background Opacity:</strong></label>
+                        </div>
+                        <div class="opacity-slider-container">
+                            <input type="range" id="opacity-slider" class="opacity-slider" min="0" max="100" value="100">
+                            <span id="opacity-value" class="opacity-value">100%</span>
+                        </div>
+                        <div id="zero-opacity-hint" class="transparency-hint" style="display:none; margin-left: 0;">
+                            Background color will be ignored since opacity is 0
+                        </div>
                     </div>
-                    <div class="transparency-hint">Color picker will be ignored if this is checked</div>
                 </div>
                 
                 <button id="process-button">Pad Image</button>
@@ -670,49 +793,63 @@
             container.insertBefore(mobileWarning, container.firstChild);
         }
 
-        // Function to toggle color picker status based on transparency checkbox
-        function toggleColorPickerStatus() {
+        // Function to handle opacity slider changes
+        function handleOpacityChange() {
+            const opacitySlider = document.getElementById('opacity-slider');
+            const opacityValue = document.getElementById('opacity-value');
             const transparentCheckbox = document.getElementById('transparent-bg');
+            const value = opacitySlider.value;
+            
+            // Update the displayed value
+            opacityValue.textContent = value + '%';
+            
+            // Update checkbox state based on slider value
+            transparentCheckbox.checked = (value === '0');
+            
+            // Update color picker visibility based on opacity
+            const isZeroOpacity = value === '0';
             const colorInput = document.getElementById('bg-color');
             const colorPreview = document.getElementById('color-preview');
             const colorHex = document.getElementById('color-hex');
             const colorPickerHint = document.querySelector('.color-picker-hint');
             const colorLabel = document.querySelector('.color-picker-container label');
+            const zeroOpacityHint = document.getElementById('zero-opacity-hint');
             
-            if (transparentCheckbox.checked) {
-                // Grey out color picker when transparent is checked
-                colorInput.style.opacity = '0.5';
-                colorPreview.style.opacity = '0.5';
-                colorHex.style.opacity = '0.5';
-                colorPickerHint.style.opacity = '0.5';
-                colorLabel.style.opacity = '0.5';
-                // Don't disable pointer events on the color input itself
-            } else {
-                // Restore color picker when transparent is unchecked
-                colorInput.style.opacity = '1';
-                colorPreview.style.opacity = '1';
-                colorHex.style.opacity = '1';
-                colorPickerHint.style.opacity = '1';
-                colorLabel.style.opacity = '1';
-            }
+            colorInput.style.opacity = isZeroOpacity ? '0.5' : '1';
+            colorPreview.style.opacity = isZeroOpacity ? '0.5' : '1';
+            colorHex.style.opacity = isZeroOpacity ? '0.5' : '1';
+            colorPickerHint.style.opacity = isZeroOpacity ? '0.5' : '1';
+            colorLabel.style.opacity = isZeroOpacity ? '0.5' : '1';
+            
+            // Show/hide zero opacity hint
+            zeroOpacityHint.style.display = isZeroOpacity ? 'block' : 'none';
         }
-        
-        // Add event listener to transparent checkbox
+
+        // Add event listener for checkbox
         const transparentCheckbox = document.getElementById('transparent-bg');
-        transparentCheckbox.addEventListener('change', toggleColorPickerStatus);
-        
-        // Add event listener to color picker to uncheck transparency
-        const colorInput = document.getElementById('bg-color');
-        colorInput.addEventListener('click', function() {
-            const transparentCheckbox = document.getElementById('transparent-bg');
-            if (transparentCheckbox.checked) {
-                transparentCheckbox.checked = false;
-                toggleColorPickerStatus();
+        transparentCheckbox.addEventListener('change', function() {
+            const opacitySlider = document.getElementById('opacity-slider');
+            
+            // If checkbox is checked, set slider to 0
+            if (this.checked) {
+                opacitySlider.value = 0;
+            } else {
+                // If unchecked and slider is already 0, set to 100
+                if (opacitySlider.value === '0') {
+                    opacitySlider.value = 100;
+                }
             }
+            
+            // Update everything based on the new slider value
+            handleOpacityChange();
         });
-        
-        // Initialize the color picker status
-        toggleColorPickerStatus();
+
+        // Keep existing event listener for slider
+        const opacitySlider = document.getElementById('opacity-slider');
+        opacitySlider.addEventListener('input', handleOpacityChange);
+
+        // Initialize on page load
+        handleOpacityChange();
 
         // File input styling
         const fileInput = document.getElementById('file-input');
@@ -727,6 +864,39 @@
                 fileLabel.classList.add('no-file');
             }
         });
+
+        // Aspect ratio preset handling
+        const aspectRatioPreset = document.getElementById('aspect-ratio-preset');
+        const customRatioInputs = document.getElementById('custom-ratio-inputs');
+        const ratioWidth = document.getElementById('ratio-width');
+        const ratioHeight = document.getElementById('ratio-height');
+
+        // Set initial values based on the default 4x3 value
+        const initialRatio = document.getElementById('aspect-ratio').value.split('x');
+        if (initialRatio.length === 2) {
+            ratioWidth.value = initialRatio[0];
+            ratioHeight.value = initialRatio[1];
+        }
+
+        // Handle preset selection
+        aspectRatioPreset.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customRatioInputs.style.display = 'block';
+            } else {
+                customRatioInputs.style.display = 'none';
+                const [width, height] = this.value.split(':');
+                // Update the hidden input used by the processing code
+                document.getElementById('aspect-ratio').value = width + 'x' + height;
+            }
+        });
+
+        // Handle custom ratio input changes
+        ratioWidth.addEventListener('input', updateCustomRatio);
+        ratioHeight.addEventListener('input', updateCustomRatio);
+
+        function updateCustomRatio() {
+            document.getElementById('aspect-ratio').value = ratioWidth.value + 'x' + ratioHeight.value;
+        }
     });
     </script>
 
@@ -792,6 +962,8 @@ async def pyProcess(event=None):
     
     # Check if transparent background is selected
     use_transparent_bg = document.getElementById("transparent-bg").checked
+    opacity_value = int(document.getElementById("opacity-slider").value) if use_transparent_bg else 255
+    alpha_value = int(opacity_value * 2.55)  # Convert 0-100 to 0-255
     
     # Get the background color from the color picker
     bg_color_hex = document.getElementById("bg-color").value
@@ -830,8 +1002,8 @@ async def pyProcess(event=None):
             # Force RGBA mode for transparency
             if im.mode != "RGBA":
                 im = im.convert("RGBA")
-            # Use transparent background
-            background_color = (255, 255, 255, 0)  # Fully transparent
+            # Use background with selected opacity
+            background_color = bg_color_rgb + (alpha_value,)  # Use the calculated alpha value
             result = Image.new("RGBA", (new_width, new_height), background_color)
         else:
             # Use selected background color
@@ -869,8 +1041,8 @@ async def pyProcess(event=None):
             # Force RGBA mode for transparency
             if im.mode != "RGBA":
                 im = im.convert("RGBA")
-            # Use transparent background
-            background_color = (255, 255, 255, 0)  # Fully transparent
+            # Use background with selected opacity
+            background_color = bg_color_rgb + (alpha_value,)  # Use the calculated alpha value
             result = Image.new("RGBA", (new_width, new_height), background_color)
         else:
             # Use selected background color
