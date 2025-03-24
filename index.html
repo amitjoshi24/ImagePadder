@@ -914,7 +914,7 @@ from pyodide.ffi import create_proxy
 import io
 import math
 import base64
-from PIL import Image
+from PIL import Image, ExifTags
 from js import document
 
 # Function to update the color preview
@@ -935,6 +935,47 @@ document.getElementById("bg-color").addEventListener("input", create_proxy(updat
 
 # Initialize the color preview
 update_color_preview()
+
+# Add this function to handle EXIF orientation
+def apply_exif_orientation(image):
+    try:
+        # Check if the image has EXIF data
+        if hasattr(image, '_getexif') and image._getexif() is not None:
+            exif = dict((ExifTags.TAGS.get(k, k), v) for k, v in image._getexif().items())
+            
+            # Look for the orientation tag
+            if 'Orientation' in exif:
+                orientation = exif['Orientation']
+                
+                # Apply the appropriate rotation
+                if orientation == 2:
+                    # Horizontal flip
+                    return image.transpose(Image.FLIP_LEFT_RIGHT)
+                elif orientation == 3:
+                    # 180 degree rotation
+                    return image.transpose(Image.ROTATE_180)
+                elif orientation == 4:
+                    # Vertical flip
+                    return image.transpose(Image.FLIP_TOP_BOTTOM)
+                elif orientation == 5:
+                    # Horizontal flip + 90 degree rotation
+                    return image.transpose(Image.FLIP_LEFT_RIGHT).transpose(Image.ROTATE_90)
+                elif orientation == 6:
+                    # 90 degree rotation
+                    return image.transpose(Image.ROTATE_270)
+                elif orientation == 7:
+                    # Horizontal flip + 270 degree rotation
+                    return image.transpose(Image.FLIP_LEFT_RIGHT).transpose(Image.ROTATE_270)
+                elif orientation == 8:
+                    # 270 degree rotation
+                    return image.transpose(Image.ROTATE_90)
+        
+        # Return the original image if no orientation was applied
+        return image
+    except Exception as e:
+        # If anything goes wrong, return the original image
+        print(f"Error applying EXIF orientation: {e}")
+        return image
 
 async def pyProcess(event=None):
     # Show loading spinner
@@ -964,6 +1005,8 @@ async def pyProcess(event=None):
     # Open the image using Pillow from the bytes
     try:
         im = Image.open(io.BytesIO(image_bytes))
+        # Apply EXIF orientation correction
+        im = apply_exif_orientation(im)
     except Exception as e:
         error_div.innerHTML = "Image cannot be opened. " + str(e)
         document.getElementById("loading-spinner").style.display = "none"
