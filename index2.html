@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Padder</title>
-    <!-- PyScript dependencies removed -->
+    <link rel="stylesheet" href="https://pyscript.net/releases/2025.2.4/core.css">
+    <script type="module" src="https://pyscript.net/releases/2025.2.4/core.js"></script>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -149,10 +150,9 @@
             text-align: center;
         }
         .image-wrapper {
+            display: inline-block;
             position: relative;
-            min-height: 300px;  /* Minimum height to ensure controls don't jump */
-            display: flex;
-            justify-content: center;
+            max-width: 100%;
         }
         .image-container img {
             display: block;
@@ -548,73 +548,13 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-
-        /* Additional slideshow styles */
-        .slideshow-button:hover {
-            background: rgba(255,255,255,0.3) !important;
-        }
-        
-        .slideshow-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed !important;
-        }
-        
-        #image-counter {
-            padding: 5px 10px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 12px;
-            min-width: 60px;
-            text-align: center;
-        }
-
-        /* Fixed slideshow controls positioning */
-        .image-wrapper {
-            position: relative;
-            min-height: 300px;  /* Minimum height to ensure controls don't jump */
-            display: flex;
-            justify-content: center;
-        }
-        
-        #slideshow-controls {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0,0,0,0.5);
-            padding: 10px;
-            z-index: 11;
-        }
-        
-        .slideshow-controls-inner {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 300px;
-            margin: 0 auto;
-        }
     </style>
+    
+    <!-- PyScript environment: load Pillow from PyPi -->
+    <py-config>
+    packages = ["pillow"]
+    </py-config>
 </head>
-<script>
-    // Add tab switching function
-    document.addEventListener('DOMContentLoaded', function() {
-        // Function to handle tab switching
-        function switchTab(tabElement) {
-            // Get the tab ID from the data attribute or ID
-            const tabId = tabElement.getAttribute('data-tab') || tabElement.id.replace('tab-', '');
-            
-            // Remove active class from all tabs and contents
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            // Add active class to the selected tab and content
-            tabElement.classList.add('active');
-            document.getElementById('content-' + tabId).classList.add('active');
-        }
-        
-        // Add click event listeners to tabs
-        document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', function() { switchTab(this); }));
-    });
-</script>
 <body>
     <div class="container">
         <h1><img src="favicon.ico" alt="Icon" style="height: 1.5em; width: auto; vertical-align: middle; margin-right: 0.5em;">Image Padder</h1>
@@ -623,16 +563,14 @@
         <div class="app-layout">
             <div class="controls-panel">
                 <div class="form-group">
-                    <h3 class="section-title">1. Select Image(s)</h3>
+                    <h3 class="section-title">1. Select Image</h3>
                     <div class="custom-file-input">
                         <label class="custom-file-input-label">
                             <i class="fas fa-upload"></i>
-                            <span id="file-label" class="no-file">Choose image file(s)</span>
-                            <input type="file" id="file-input" accept="image/*" multiple>
+                            <span id="file-label" class="no-file">Choose an image file</span>
+                            <input type="file" id="file-input" accept="image/*">
                         </label>
                     </div>
-                    <!-- Container for displaying selected file names -->
-                    <div id="selected-files-list" style="display: none; margin-top: 10px; max-height: 150px; overflow-y: auto; border: 1px solid #eee; border-radius: 4px; padding: 8px; font-size: 0.9rem;"></div>
                 </div>
 
                 <div class="form-group">
@@ -722,8 +660,8 @@
                     </div>
                 </div>
                 
-                <button id="process-button">Pad Image(s)</button>
-                <div id="loading-spinner" class="loading-spinner" style="display:none;">
+                <button id="process-button">Pad Image</button>
+                <div id="loading-spinner" class="loading-spinner">
                     <div class="spinner"></div>
                     <div class="loading-text">Processing image...</div>
                 </div>
@@ -738,21 +676,7 @@
                 <div id="image-container" class="image-container" style="display:none;">
                     <div class="image-wrapper">
                         <img id="result-image" />
-                        <!-- Better Slideshow UI -->
-                        <div id="slideshow-controls" style="display: none; backdrop-filter: blur(5px);">
-                            <div class="slideshow-controls-inner">
-                                <button id="prev-image" class="slideshow-button" style="background: transparent; color: white; border: none; font-size: 20px; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s;">
-                                    <i class="fas fa-chevron-left"></i>
-                                </button>
-                                
-                                <span id="image-counter" style="color: white; font-size: 14px; font-weight: bold; padding: 5px 10px; background: rgba(0,0,0,0.3); border-radius: 12px; min-width: 60px; text-align: center;">1/1</span>
-                                
-                                <button id="next-image" class="slideshow-button" style="background: transparent; color: white; border: none; font-size: 20px; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s;">
-                                    <i class="fas fa-chevron-right"></i>
-                                </button>
-                            </div>
-                        </div>                        
-                        <a id="download-link" class="download-overlay" download="padded_image.png" style="z-index: 10;">
+                        <a id="download-link" class="download-overlay" download="padded_image.png">
                             <i class="fas fa-download download-icon"></i>
                         </a>
                     </div>
@@ -776,7 +700,6 @@
                 <script type='text/javascript'>kofiwidget2.init('Support me on Ko-fi', '#f57373', 'I2I81CDN0L');kofiwidget2.draw();</script>
             </div>
         </div>
-        
         
         <div class="credits">
             Credits: Amit Joshi (<a href="https://github.com/amitjoshi24" target="_blank">@amitjoshi24</a>) 
@@ -938,7 +861,7 @@
                 fileLabel.textContent = this.files[0].name;
                 fileLabel.classList.remove('no-file');
             } else {
-                fileLabel.textContent = 'Choose image file(s)';
+                fileLabel.textContent = 'Choose an image file';
                 fileLabel.classList.add('no-file');
             }
         });
@@ -1005,441 +928,267 @@
             document.getElementById('loading-spinner').style.display = 'none';
         };
     });
-
-    // Image processing implementation
-    document.addEventListener('DOMContentLoaded', function() {
-        // Get UI elements
-        const fileInput = document.getElementById('file-input');
-        const processButton = document.getElementById('process-button');
-        const errorMessage = document.getElementById('error-message');
-        const resultImage = document.getElementById('result-image');
-        const resultPlaceholder = document.getElementById('result-placeholder');
-        const imageContainer = document.getElementById('image-container');
-        const downloadLink = document.getElementById('download-link');
-        const bgColorInput = document.getElementById('bg-color');
-        const selectedFilesList = document.getElementById('selected-files-list');
-        const slideshowControls = document.getElementById('slideshow-controls');
-        const prevImageBtn = document.getElementById('prev-image');
-        const nextImageBtn = document.getElementById('next-image');
-        const transparentBgCheckbox = document.getElementById('transparent-bg');
-        const opacitySlider = document.getElementById('opacity-slider');
-
-        // Set up tab switching
-        const tabs = document.querySelectorAll('.tab');
-        tabs.forEach(function(tab) {
-            tab.addEventListener('click', function() {
-                // Get the tab ID from the data attribute or ID
-                const tabId = this.getAttribute('data-tab') || this.id.replace('tab-', '');
-                
-                // Remove active class from all tabs and contents
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                
-                // Add active class to the selected tab and content
-                this.classList.add('active');
-                const contentElement = document.getElementById('content-' + tabId);
-                if (contentElement) contentElement.classList.add('active');
-            });
-        });
-
-        // Process button click handler
-        processButton.addEventListener('click', function() {
-            processImage();
-            // Always hide slideshow controls initially
-            slideshowControls.style.display = 'none';
-        });
-
-        // Reset UI when loading new images
-        function resetUI() {
-            processedImages = [];
-            slideshowControls.style.display = 'none';
-        }
-
-        // Global array to store processed images for slideshow
-        let processedImages = [];
-        let currentImageIndex = 0;
-
-        // Main image processing function
-        async function processImage() {
-            errorMessage.textContent = '';
-            
-            try {
-                // Check if a file is selected
-                if (fileInput.files.length === 0) {
-                    throw new Error('Please select an image file.');
-                }
-                
-                resetUI();
-                
-                // Show the spinner
-                document.getElementById('loading-spinner').style.display = 'block';
-                
-                // Check if we're processing one or multiple files
-                if (fileInput.files.length === 1) {
-                    // Single file processing
-                    const file = fileInput.files[0];
-                    
-                    // Process the image
-                    const processedImageDataUrl = await padImage(file);
-                    
-                    // Display the processed image
-                    resultImage.src = processedImageDataUrl;
-                    downloadLink.href = processedImageDataUrl;
-                    downloadLink.download = `padded_${file.name}`;
-                    
-                    // Hide placeholder, show image
-                    resultPlaceholder.style.display = 'none';
-                    imageContainer.style.display = 'block';
-                } else {
-                    // Multiple files - We'll need JSZip
-                    await loadJSZip();
-                    
-                    // Update placeholder to show we're processing multiple files
-                    resultPlaceholder.style.display = 'block';
-                    resultPlaceholder.innerHTML = '<p>Processing multiple files...</p><p><i class="fas fa-cog fa-spin fa-3x"></i></p>';
-                    imageContainer.style.display = 'none';
-                    
-                    // Reset processed images array
-                    processedImages = [];
-                    currentImageIndex = 0;
-                    
-                    // Create a new zip file
-                    const zip = new JSZip();
-                    let processedCount = 0;
-                    
-                    // Process each file
-                    for (let i = 0; i < fileInput.files.length; i++) {
-                        const file = fileInput.files[i];
-                        try {
-                            // Update progress in placeholder
-                            resultPlaceholder.innerHTML = `<p>Processing file ${i+1} of ${fileInput.files.length}...</p><p><i class="fas fa-cog fa-spin fa-3x"></i></p>`;
-                            
-                            // Process the image
-                            const processedImageDataUrl = await padImage(file);
-                            
-                            // Store in our slideshow array
-                            processedImages.push({
-                                url: processedImageDataUrl,
-                                name: file.name
-                            });
-                            // Add the processed image to the zip
-                            const base64Data = processedImageDataUrl.split(',')[1];
-                            zip.file(`padded_${file.name}`, base64Data, {base64: true});
-                            processedCount++;
-                        } catch (err) {
-                            console.error(`Error processing file ${file.name}:`, err);
-                        }
-                    }
-                    
-                    if (processedCount > 0) {
-                        // Generate the zip file
-                        resultPlaceholder.innerHTML = `<p>Creating ZIP file with ${processedCount} images...</p><p><i class="fas fa-archive fa-3x"></i></p>`;
-                        const zipBlob = await zip.generateAsync({type: 'blob'});
-                        const zipUrl = URL.createObjectURL(zipBlob);
-                        
-                        // Create a download link and trigger it
-                        const link = document.createElement('a');
-                        link.href = zipUrl;
-                        link.download = 'padded_images.zip';
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                        
-                        // Show the first processed image in a slideshow
-                        resultPlaceholder.style.display = 'none';
-                        imageContainer.style.display = 'block';
-                        if (processedImages.length > 0) {
-                            showImageAtIndex(0);
-                            slideshowControls.style.display = processedImages.length > 1 ? 'block' : 'none';
-                            document.getElementById('image-counter').textContent = `1/${processedImages.length}`;
-                        }
-
-                        errorMessage.style.color = '#4285F4';
-                        errorMessage.textContent = `Successfully processed ${processedCount} images. ZIP download started.`;
-                    } else {
-                        throw new Error('No images could be processed. Please check your files and try again.');
-                    }
-                }
-            } catch (error) {
-                console.error('Error processing image:', error);
-                errorMessage.textContent = error.message || 'Error processing image';
-                errorMessage.style.color = 'red';
-                resultPlaceholder.innerHTML = '<p>Your padded image will appear here</p><p><i class="fas fa-image fa-3x"></i></p>';
-            } finally {
-                // Hide the spinner
-                window.hideSpinner();
-            }
-        }
-        
-        // Function to pad an image with the selected parameters
-        async function padImage(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    const img = new Image();
-                    
-                    img.onload = function() {
-                        try {
-                            const canvas = document.createElement('canvas');
-                            const ctx = canvas.getContext('2d');
-                            
-                            // Get original dimensions
-                            const width = img.width;
-                            const height = img.height;
-                            
-                            // Get background color
-                            const bgColorHex = bgColorInput.value;
-                            
-                            // Convert hex to RGB
-                            const r = parseInt(bgColorHex.slice(1, 3), 16);
-                            const g = parseInt(bgColorHex.slice(3, 5), 16);
-                            const b = parseInt(bgColorHex.slice(5, 7), 16);
-                            
-                            // Get transparency settings
-                            const useTransparentBg = transparentBgCheckbox.checked;
-                            const opacity = parseInt(opacitySlider.value) / 100;
-                            
-                            // Determine which mode is active: aspect ratio or custom padding
-                            const isAspectRatioMode = document.getElementById('content-aspect-ratio').classList.contains('active');
-                            
-                            let newWidth, newHeight, offsetX, offsetY;
-                            
-                            if (isAspectRatioMode) {
-                                // Get aspect ratio
-                                const aspectRatioInput = document.getElementById('aspect-ratio').value;
-                                let nw, nh;
-                                
-                                try {
-                                    const parts = aspectRatioInput.split('x');
-                                    if (parts.length !== 2) {
-                                        throw new Error('Invalid format');
-                                    }
-                                    
-                                    nw = parseInt(parts[0]);
-                                    nh = parseInt(parts[1]);
-                                    
-                                    if (isNaN(nw) || isNaN(nh) || nw <= 0 || nh <= 0) {
-                                        throw new Error('Invalid values');
-                                    }
-                                } catch (e) {
-                                    reject(new Error('Invalid aspect ratio. Must be in the format WIDTHxHEIGHT, e.g. 4x3.'));
-                                    return;
-                                }
-                                
-                                // Determine whether to pad vertically or horizontally
-                                const verticalPad = (nw / nh) <= (width / height);
-                                
-                                if (verticalPad) {
-                                    newWidth = width;
-                                    newHeight = Math.ceil(width * nh / nw);
-                                    offsetX = 0;
-                                    offsetY = Math.floor((newHeight - height) / 2);
-                                } else {
-                                    newWidth = Math.ceil(height * nw / nh);
-                                    newHeight = height;
-                                    offsetX = Math.floor((newWidth - width) / 2);
-                                    offsetY = 0;
-                                }
-                            } else {
-                                // Custom padding mode
-                                try {
-                                    const paddingTop = parseInt(document.getElementById('padding-top').value) || 0;
-                                    const paddingRight = parseInt(document.getElementById('padding-right').value) || 0;
-                                    const paddingBottom = parseInt(document.getElementById('padding-bottom').value) || 0;
-                                    const paddingLeft = parseInt(document.getElementById('padding-left').value) || 0;
-                                    
-                                    if (paddingTop < 0 || paddingRight < 0 || paddingBottom < 0 || paddingLeft < 0) {
-                                        throw new Error('Negative values');
-                                    }
-                                    
-                                    newWidth = width + paddingLeft + paddingRight;
-                                    newHeight = height + paddingTop + paddingBottom;
-                                    offsetX = paddingLeft;
-                                    offsetY = paddingTop;
-                                } catch (e) {
-                                    reject(new Error('Invalid padding values. Please enter positive numbers.'));
-                                    return;
-                                }
-                            }
-                            
-                            // Set canvas dimensions
-                            canvas.width = newWidth;
-                            canvas.height = newHeight;
-                            
-                            // Fill background with color (and transparency if selected)
-                            ctx.clearRect(0, 0, newWidth, newHeight);
-                            
-                            if (useTransparentBg) {
-                                ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-                            } else {
-                                ctx.fillStyle = bgColorHex;
-                            }
-                            
-                            ctx.fillRect(0, 0, newWidth, newHeight);
-                            
-                            // Draw the original image at the calculated position
-                            ctx.drawImage(img, offsetX, offsetY);
-                            
-                            // Convert to data URL
-                            const dataUrl = canvas.toDataURL('image/png');
-                            resolve(dataUrl);
-                            
-                        } catch (error) {
-                            reject(new Error('Error processing image: ' + error.message));
-                        }
-                    };
-                    
-                    img.onerror = function() {
-                        reject(new Error('Failed to load image. The file may not be a valid image.'));
-                    };
-                    
-                    img.src = e.target.result;
-                };
-                
-                reader.onerror = function() {
-                    reject(new Error('Error reading file.'));
-                };
-                
-                reader.readAsDataURL(file);
-            });
-        }
-        
-        // Function to display image at specific index in slideshow
-        function showImageAtIndex(index) {
-            if (!processedImages.length || index < 0 || index >= processedImages.length) return;
-            
-            currentImageIndex = index;
-            const image = processedImages[index];
-            
-            resultImage.src = image.url;
-            downloadLink.href = image.url;
-            downloadLink.download = `padded_${image.name}`;
-            
-            // Update counter
-            document.getElementById('image-counter').textContent = `${index + 1}/${processedImages.length}`;
-            
-            // Enable/disable navigation buttons
-            prevImageBtn.disabled = index === 0;
-            nextImageBtn.disabled = index === processedImages.length - 1;
-        }
-        
-        // Slideshow navigation
-        prevImageBtn.addEventListener('click', function() {
-            if (currentImageIndex > 0) {
-                showImageAtIndex(currentImageIndex - 1);
-            }
-        });
-        
-        nextImageBtn.addEventListener('click', function() {
-            if (currentImageIndex < processedImages.length - 1) {
-                showImageAtIndex(currentImageIndex + 1);
-            }
-        });
-        
-        // Update aspect ratio when preset is selected
-        document.getElementById('aspect-ratio-preset').addEventListener('change', function() {
-            const preset = this.value;
-            if (preset !== 'custom') {
-                const [width, height] = preset.split(':');
-                document.getElementById('ratio-width').value = width;
-                document.getElementById('ratio-height').value = height;
-                document.getElementById('aspect-ratio').value = width + 'x' + height;
-            }
-        });
-        
-        // Update displayed filename when files are selected
-        fileInput.addEventListener('change', function() {
-            const fileLabel = document.getElementById('file-label');
-            
-            // Clear any previous messages and file list
-            selectedFilesList.innerHTML = '';
-            selectedFilesList.style.display = 'none';
-            errorMessage.textContent = '';
-            slideshowControls.style.display = 'none';
-            
-            if (this.files.length === 0) {
-                fileLabel.textContent = 'Choose image file(s)';
-                processButton.textContent = 'Pad Image(s)';
-                slideshowControls.style.display = 'none';
-            } else if (this.files.length > 1) {
-                fileLabel.textContent = `${this.files.length} files selected`;
-                fileLabel.classList.remove('no-file');
-                processButton.textContent = 'Pad Image(s)';
-                
-                // Display all file names in the scrollable list
-                selectedFilesList.style.display = 'block';
-                
-                // Create a stylized list of files
-                const fileList = document.createElement('ul');
-                fileList.style.listStyle = 'none';
-                fileList.style.padding = '0';
-                fileList.style.margin = '0';
-                
-                for (let i = 0; i < this.files.length; i++) {
-                    const item = document.createElement('li');
-                    item.style.padding = '4px 0';
-                    item.style.borderBottom = i < this.files.length - 1 ? '1px solid #eee' : 'none';
-                    item.innerHTML = `<i class="fas fa-image" style="color: #4285F4; margin-right: 8px;"></i> ${this.files[i].name}`;
-                    fileList.appendChild(item);
-                }
-                
-                selectedFilesList.appendChild(fileList);
-            } else if (this.files.length === 1) {
-                fileLabel.textContent = this.files[0].name;
-                fileLabel.classList.remove('no-file');
-                processButton.textContent = 'Pad Image(s)';
-                // Reset processed images for slideshow
-                processedImages = [];
-                currentImageIndex = 0;
-            } else {
-                fileLabel.textContent = 'Multiple files selected';
-                fileLabel.classList.remove('no-file');
-                
-                // Display all file names in the scrollable list
-                selectedFilesList.style.display = 'block';
-                
-                // Create a stylized list of files
-                const fileList = document.createElement('ul');
-                fileList.style.listStyle = 'none';
-                fileList.style.padding = '0';
-                fileList.style.margin = '0';
-                
-                for (let i = 0; i < this.files.length; i++) {
-                    const item = document.createElement('li');
-                    item.style.padding = '4px 0';
-                    item.style.borderBottom = i < this.files.length - 1 ? '1px solid #eee' : 'none';
-                    item.innerHTML = `<i class="fas fa-image" style="color: #4285F4; margin-right: 8px;"></i> ${this.files[i].name}`;
-                    fileList.appendChild(item);
-                }
-                
-                selectedFilesList.appendChild(fileList);
-            }
-        });
-
-        // Add keyboard navigation for slideshow (left/right arrows)
-        document.addEventListener('keydown', function(e) {
-            if (!processedImages.length || processedImages.length <= 1) return;
-            if (e.key === 'ArrowLeft' && currentImageIndex > 0) showImageAtIndex(currentImageIndex - 1);
-            if (e.key === 'ArrowRight' && currentImageIndex < processedImages.length - 1) showImageAtIndex(currentImageIndex + 1);
-        });
-    });
-
-    // Function to load JSZip library dynamically
-    async function loadJSZip() {
-        return new Promise((resolve, reject) => {
-            if (window.JSZip) {
-                resolve();
-                return;
-            }
-            
-            const script = document.createElement('script');
-            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
-            script.onload = () => resolve();
-            script.onerror = () => reject(new Error('Failed to load JSZip. Check your internet connection.'));
-            document.head.appendChild(script);
-        });
-    }
     </script>
+
+    <py-script>
+from pyodide.ffi import create_proxy
+import io
+import math
+import base64
+from PIL import Image, ExifTags
+from js import document, window
+
+# Function to update the color preview
+def update_color_preview(event=None):
+    color_input = document.getElementById("bg-color")
+    color_value = color_input.value
+    
+    # Update the preview box
+    preview = document.getElementById("color-preview")
+    preview.style.backgroundColor = color_value
+    
+    # Update the hex text
+    hex_text = document.getElementById("color-hex")
+    hex_text.innerHTML = color_value.upper()
+
+# Set up the color picker event listener
+document.getElementById("bg-color").addEventListener("input", create_proxy(update_color_preview))
+
+# Initialize the color preview
+update_color_preview()
+
+# Add this function to handle EXIF orientation
+def apply_exif_orientation(image):
+    try:
+        # Check if the image has EXIF data
+        if hasattr(image, '_getexif') and image._getexif() is not None:
+            exif = dict((ExifTags.TAGS.get(k, k), v) for k, v in image._getexif().items())
+            
+            # Look for the orientation tag
+            if 'Orientation' in exif:
+                orientation = exif['Orientation']
+                
+                # Apply the appropriate rotation
+                if orientation == 2:
+                    # Horizontal flip
+                    return image.transpose(Image.FLIP_LEFT_RIGHT)
+                elif orientation == 3:
+                    # 180 degree rotation
+                    return image.transpose(Image.ROTATE_180)
+                elif orientation == 4:
+                    # Vertical flip
+                    return image.transpose(Image.FLIP_TOP_BOTTOM)
+                elif orientation == 5:
+                    # Horizontal flip + 90 degree rotation
+                    return image.transpose(Image.FLIP_LEFT_RIGHT).transpose(Image.ROTATE_90)
+                elif orientation == 6:
+                    # 90 degree rotation
+                    return image.transpose(Image.ROTATE_270)
+                elif orientation == 7:
+                    # Horizontal flip + 270 degree rotation
+                    return image.transpose(Image.FLIP_LEFT_RIGHT).transpose(Image.ROTATE_270)
+                elif orientation == 8:
+                    # 270 degree rotation
+                    return image.transpose(Image.ROTATE_90)
+        
+        # Return the original image if no orientation was applied
+        return image
+    except Exception as e:
+        # If anything goes wrong, return the original image
+        print(f"Error applying EXIF orientation: {e}")
+        return image
+
+async def pyProcess(event=None):
+    # Import js at the beginning of the function to ensure it's available throughout
+    from js import document, window
+    
+    try:
+        # Clear previous error messages
+        error_div = document.getElementById("error-message")
+        error_div.innerHTML = ""
+        
+        # Get the selected file from the file input element
+        file_input = document.getElementById("file-input")
+        if file_input.files.length == 0:
+            error_div.innerHTML = "Please select an image file."
+            return
+        file = file_input.files.item(0)
+        
+        # Read the file as bytes using file.arrayBuffer()
+        try:
+            data = await file.arrayBuffer()
+            image_bytes = bytes(bytearray(data.to_py()))
+        except Exception as e:
+            error_div.innerHTML = "Error reading file: " + str(e)
+            return
+        
+        # Open the image using Pillow from the bytes
+        try:
+            im = Image.open(io.BytesIO(image_bytes))
+            # Apply EXIF orientation correction
+            im = apply_exif_orientation(im)
+        except Exception as e:
+            error_div.innerHTML = "Image cannot be opened. " + str(e)
+            return
+        
+        # Check if transparent background is selected
+        use_transparent_bg = document.getElementById("transparent-bg").checked
+        opacity_value = int(document.getElementById("opacity-slider").value) if use_transparent_bg else 255
+        alpha_value = int(opacity_value * 2.55)  # Convert 0-100 to 0-255
+        
+        # Get the background color from the color picker
+        bg_color_hex = document.getElementById("bg-color").value
+        # Convert hex to RGB
+        bg_color_hex = bg_color_hex.lstrip('#')
+        bg_color_rgb = tuple(int(bg_color_hex[i:i+2], 16) for i in (0, 2, 4))
+        
+        # Determine which mode is active
+        aspect_ratio_tab = document.getElementById("content-aspect-ratio")
+        is_aspect_ratio_mode = aspect_ratio_tab.classList.contains("active")
+        
+        # Get the original image dimensions
+        width, height = im.size
+        
+        if is_aspect_ratio_mode:
+            # Aspect ratio mode
+            aspect_ratio_input = document.getElementById("aspect-ratio").value
+            try:
+                nw, nh = tuple(int(num) for num in aspect_ratio_input.split('x'))
+            except Exception as e:
+                error_div.innerHTML = "Invalid aspect ratio. Must be in the format WIDTHxHEIGHT, e.g. 4x3."
+                return
+            
+            # Determine whether to pad vertically or horizontally
+            vertical_pad = (nw / nh) <= (width / height)
+            if vertical_pad:
+                new_width = width
+                new_height = int(math.ceil(width * nh / nw))
+            else:
+                new_width = int(math.ceil(height * nw / nh))
+                new_height = height
+            
+            # When creating the new image, handle transparency if selected
+            if use_transparent_bg:
+                # Force RGBA mode for transparency
+                if im.mode != "RGBA":
+                    im = im.convert("RGBA")
+                # Use background with selected opacity
+                background_color = bg_color_rgb + (alpha_value,)  # Use the calculated alpha value
+                result = Image.new("RGBA", (new_width, new_height), background_color)
+            else:
+                # Use selected background color
+                if im.mode in ("RGBA", "LA"):
+                    background_color = bg_color_rgb + (255,)  # Add alpha channel
+                else:
+                    background_color = bg_color_rgb
+                result = Image.new(im.mode, (new_width, new_height), background_color)
+            
+            # Calculate paste offset to center the image
+            if vertical_pad:
+                offset = ((new_height - height) // 2)
+                result.paste(im, (0, offset))
+            else:
+                offset = ((new_width - width) // 2)
+                result.paste(im, (offset, 0))
+        else:
+            # Custom padding mode
+            try:
+                padding_top = int(document.getElementById("padding-top").value)
+                padding_right = int(document.getElementById("padding-right").value)
+                padding_bottom = int(document.getElementById("padding-bottom").value)
+                padding_left = int(document.getElementById("padding-left").value)
+            except Exception as e:
+                error_div.innerHTML = "Invalid padding values. Please enter positive numbers."
+                return
+            
+            # Calculate new dimensions
+            new_width = width + padding_left + padding_right
+            new_height = height + padding_top + padding_bottom
+            
+            # When creating the new image, handle transparency if selected
+            if use_transparent_bg:
+                # Force RGBA mode for transparency
+                if im.mode != "RGBA":
+                    im = im.convert("RGBA")
+                # Use background with selected opacity
+                background_color = bg_color_rgb + (alpha_value,)  # Use the calculated alpha value
+                result = Image.new("RGBA", (new_width, new_height), background_color)
+            else:
+                # Use selected background color
+                if im.mode in ("RGBA", "LA"):
+                    background_color = bg_color_rgb + (255,)  # Add alpha channel
+                else:
+                    background_color = bg_color_rgb
+                result = Image.new(im.mode, (new_width, new_height), background_color)
+            
+            # Paste the original image with the specified padding
+            result.paste(im, (padding_left, padding_top))
+        
+        # Save the result image to a bytes buffer in PNG format
+        output_buffer = io.BytesIO()
+        try:
+            result.save(output_buffer, format="PNG")
+        except Exception as e:
+            error_div.innerHTML = "Error saving padded image: " + str(e)
+            return
+        
+        output_bytes = output_buffer.getvalue()
+        
+        # Encode the image to base64 so it can be embedded in the HTML
+        b64_str = base64.b64encode(output_bytes).decode("utf-8")
+        img_data = "data:image/png;base64," + b64_str
+        
+        # Hide loading spinner when done (whether successful or not)
+        window.hideSpinner()
+        
+        # Hide placeholder and show image container
+        document.getElementById("result-placeholder").style.display = "none"
+        document.getElementById("image-container").style.display = "block"
+        
+        # Display the padded image
+        result_img = document.getElementById("result-image")
+        result_img.src = img_data
+        
+        # Update the download link with the new image data
+        download_link = document.getElementById("download-link")
+        download_link.href = img_data
+
+    except Exception as e:
+        print(f"Python error: {e}")
+        error_div.innerHTML = "Error processing image: " + str(e)
+        
+    finally:
+        # We already imported window at the beginning, so no need to import again
+        window.hideSpinner()
+
+# Create a proxy for the PyScript function to ensure proper interaction
+document.getElementById("process-button").onclick = create_proxy(pyProcess)
+
+# Function to handle tab switching from PyScript
+def switch_tab(tab_id):
+    # Get all tabs and contents
+    tabs = document.querySelectorAll('.tab')
+    contents = document.querySelectorAll('.tab-content')
+    
+    # Remove active class from all
+    for i in range(tabs.length):
+        tabs[i].classList.remove('active')
+        
+    for i in range(contents.length):
+        contents[i].classList.remove('active')
+    
+    # Add active class to selected tab and content
+    selected_tab = document.getElementById('tab-' + tab_id)
+    selected_content = document.getElementById('content-' + tab_id)
+    
+    if selected_tab:
+        selected_tab.classList.add('active')
+    if selected_content:
+        selected_content.classList.add('active')
+
+# Add click handlers for tabs
+document.getElementById("tab-aspect-ratio").addEventListener("click", create_proxy(lambda e: switch_tab('aspect-ratio')))
+document.getElementById("tab-custom-padding").addEventListener("click", create_proxy(lambda e: switch_tab('custom-padding')))
+    </py-script>
 </body>
 </html>
