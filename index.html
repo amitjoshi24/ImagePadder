@@ -984,6 +984,29 @@
             // Set the dropdown to "Custom" when manually changing width/height
             aspectRatioPreset.value = "custom";
         }
+
+        // Add color picker functionality
+        const colorPreview = document.getElementById('color-preview');
+        const colorHex = document.getElementById('color-hex');
+        
+        // Update color preview and hex display when color changes
+        const bgColorInput = document.getElementById('bg-color');
+        bgColorInput.addEventListener('input', updateColorPreview);
+        
+        // Initial color preview update
+        updateColorPreview();
+        
+        // Function to update the color preview and hex code
+        function updateColorPreview() {
+            const selectedColor = bgColorInput.value;
+            colorPreview.style.backgroundColor = selectedColor;
+            colorHex.textContent = selectedColor.toUpperCase();
+        }
+        
+        // Show/hide opacity slider based on transparency checkbox
+        document.getElementById('transparent-bg').addEventListener('change', function() {
+            document.getElementById('opacity-container').style.display = this.checked ? 'block' : 'none';
+        });
     });
 
     // Direct approach to spinner management
