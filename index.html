@@ -579,6 +579,25 @@
             padding: 5px 0;
         }
 
+        /* Single image download button in slideshow */
+        .slideshow-download-button {
+            background-color: #34A853;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-left: 15px;
+        }
+
+        .slideshow-download-button:hover {
+            background-color: #2E8B57;
+        }
+
         /* Hide console errors in UI */
         .error { display: block; }
     </style>
@@ -607,6 +626,10 @@
     // Global variables
     let processedZip = null;
     let fileInput = null;
+    
+    // Slideshow globals
+    let processedImages = [];
+    let currentImageIndex = 0;
 </script>
 <body>
     <div class="container">
@@ -741,17 +764,27 @@
                         <img id="result-image" />
                         <div id="slideshow-controls" style="display: none; backdrop-filter: blur(5px);">
                             <div class="slideshow-controls-inner">
-                                <button id="prev-image" class="slideshow-button" style="background: transparent; color: white; border: none; font-size: 20px; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s;">
-                                    <i class="fas fa-chevron-left"></i>
-                                </button>
-                                
-                                <span id="image-counter" style="color: white; font-size: 14px; font-weight: bold; padding: 5px 10px; background: rgba(0,0,0,0.3); border-radius: 12px; min-width: 60px; text-align: center;">1/1</span>
-                                
-                                <button id="next-image" class="slideshow-button" style="background: transparent; color: white; border: none; font-size: 20px; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s;">
-                                    <i class="fas fa-chevron-right"></i>
-                                </button>
-                            </div>
-                        </div>                        
+                                <div style="display: flex; justify-content: center; align-items: center; width: 100%;">
+                                    <button id="prev-image" class="slideshow-button" style="background: transparent; color: white; border: none; font-size: 20px; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s;">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    
+                                    <div style="display: flex; align-items: center; margin: 0 10px;">
+                                        <span id="image-counter" style="color: white; font-size: 14px; font-weight: bold; padding: 5px 10px; background: rgba(0,0,0,0.3); border-radius: 12px; min-width: 60px; text-align: center;">1/1</span>
+                                        
+                                        <!-- Single image download button -->
+                                        <button id="download-current-image" class="slideshow-download-button" onclick="downloadCurrentImage(event)">
+                                            <i class="fas fa-download"></i>
+                                            <span>Download</span>
+                                        </button>
+                                    </div>
+                                    
+                                    <button id="next-image" class="slideshow-button" style="background: transparent; color: white; border: none; font-size: 20px; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s;">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>                        
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1074,10 +1107,6 @@
             processedImages = [];
             slideshowControls.style.display = 'none';
         }
-
-        // Global array to store processed images for slideshow
-        let processedImages = [];
-        let currentImageIndex = 0;
 
         // Main image processing function
         async function processImage() {
@@ -1515,6 +1544,25 @@
             if (errorMessage) errorMessage.textContent = 'Error creating download: ' + error.message;
             return false;
         }
+    }
+
+    // Function to download just the current image in the slideshow
+    function downloadCurrentImage(e) {
+        e.preventDefault();
+        
+        // Make sure we have an image to download
+        if (!processedImages || !processedImages.length || currentImageIndex < 0 || currentImageIndex >= processedImages.length) {
+            return false;
+        }
+        
+        // Get the current image from the slideshow
+        const currentImage = processedImages[currentImageIndex];
+        
+        // Create a download link for just this image
+        const link = document.createElement('a');
+        link.href = currentImage.url;
+        link.download = `padded_${currentImage.name}`;
+        link.click();
     }
     </script>
 </body>
