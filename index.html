@@ -630,6 +630,9 @@
     // Slideshow globals
     let processedImages = [];
     let currentImageIndex = 0;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let minSwipeDistance = 50; // Minimum distance to register as a swipe
 </script>
 <body>
     <div class="container">
@@ -771,7 +774,7 @@
                     
                     <div class="image-wrapper">
                         <img id="result-image" />
-                        <div id="slideshow-controls" style="display: none; backdrop-filter: blur(5px);">
+                        <div id="slideshow-controls" style="display: none; backdrop-filter: blur(5px);" class="swipe-controls">
                             <div class="slideshow-controls-inner">
                                 <div style="display: flex; justify-content: center; align-items: center; width: 100%;">
                                     <button id="prev-image" class="slideshow-button" style="background: transparent; color: white; border: none; font-size: 20px; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s;">
@@ -1208,6 +1211,11 @@
                             showImageAtIndex(0);
                             slideshowControls.style.display = processedImages.length > 1 ? 'block' : 'none';
                             document.getElementById('image-counter').textContent = `1/${processedImages.length}`;
+                            
+                            // Set up touch swipe for mobile if we have multiple images
+                            if (processedImages.length > 1) {
+                                setupSwipeGestures();
+                            }
                         }
 
                         errorMessage.style.color = '#4285F4';
@@ -1406,6 +1414,12 @@
         
         // Update displayed filename when files are selected
         fileInput.addEventListener('change', function() {
+            // Reset touch handlers on new file selection
+            const imageElement = document.getElementById('result-image');
+            if (imageElement) {
+                imageElement.removeEventListener('touchstart', null);
+                imageElement.removeEventListener('touchend', null);
+            }
             const fileLabel = document.getElementById('file-label');
             
             // Clear any previous messages and file list
@@ -1573,6 +1587,61 @@
         link.download = `padded_${currentImage.name}`;
         link.click();
     }
+
+    // Function to set up swipe gestures for mobile
+    function setupSwipeGestures() {
+        const imageElement = document.getElementById('result-image');
+        
+        // Touch start event to record the starting position
+        imageElement.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+        
+        // Touch end event to determine if it was a swipe and in which direction
+        imageElement.addEventListener('touchend', function(e) {
+            const touchEndX = e.changedTouches[0].screenX;
+            const touchEndY = e.changedTouches[0].screenY;
+            
+            // Calculate horizontal and vertical distance
+            const distX = touchStartX - touchEndX;
+            const distY = touchStartY - touchEndY;
+            
+            // Check if horizontal swipe is more significant than vertical
+            if (Math.abs(distX) > Math.abs(distY) && Math.abs(distX) > minSwipeDistance) {
+                // Determine direction
+                if (distX > 0) {
+                    // Swipe left - next image
+                    if (currentImageIndex < processedImages.length - 1) {
+                        showImageAtIndex(currentImageIndex + 1);
+                    }
+                } else {
+                    // Swipe right - previous image
+                    if (currentImageIndex > 0) {
+                        showImageAtIndex(currentImageIndex - 1);
+                    }
+                }
+            }
+        }, { passive: true });
+    }
+
+    // Add visual feedback for swipe gestures
+    document.addEventListener('DOMContentLoaded', function() {
+        const resultImage = document.getElementById('result-image');
+        
+        // Show/hide swipe hint on mobile devices
+        if ('ontouchstart' in window && resultImage) {
+            // Create a swipe hint overlay
+            const swipeHint = document.createElement('div');
+            swipeHint.innerHTML = '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; pointer-events: none; z-index: 100; opacity: 0.8;">Swipe to navigate</div>';
+            swipeHint.style.position = 'absolute';
+            swipeHint.style.top = '0';
+            swipeHint.style.left = '0';
+            swipeHint.style.width = '100%';
+            swipeHint.style.height = '100%';
+            swipeHint.style.display = 'none';
+        }
+    });
     </script>
 </body>
 </html>
