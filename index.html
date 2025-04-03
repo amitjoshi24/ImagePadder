@@ -598,6 +598,28 @@
             background-color: #2E8B57;
         }
 
+        /* Swipe area for mobile */
+        .swipe-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10;
+            display: none; /* Only visible when swiping is active */
+        }
+
+        /* Swipe indication animation */
+        @keyframes swipeIndication {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(20px); }
+        }
+
+        .swipe-active {
+            background-color: rgba(255,255,255,0.1);
+            cursor: grab;
+        }
+
         /* Hide console errors in UI */
         .error { display: block; }
     </style>
@@ -773,7 +795,11 @@
                     </div>
                     
                     <div class="image-wrapper">
+                        <!-- Invisible overlay for better touch detection -->
+                        <div id="swipe-area" class="swipe-area"></div>
+                        
                         <img id="result-image" />
+                        
                         <div id="slideshow-controls" style="display: none; backdrop-filter: blur(5px);" class="swipe-controls">
                             <div class="slideshow-controls-inner">
                                 <div style="display: flex; justify-content: center; align-items: center; width: 100%;">
@@ -1212,10 +1238,7 @@
                             slideshowControls.style.display = processedImages.length > 1 ? 'block' : 'none';
                             document.getElementById('image-counter').textContent = `1/${processedImages.length}`;
                             
-                            // Set up touch swipe for mobile if we have multiple images
-                            if (processedImages.length > 1) {
-                                setupSwipeGestures();
-                            }
+                            setupSwipeGestures();
                         }
 
                         errorMessage.style.color = '#4285F4';
@@ -1590,56 +1613,119 @@
 
     // Function to set up swipe gestures for mobile
     function setupSwipeGestures() {
-        const imageElement = document.getElementById('result-image');
+        if (!processedImages || processedImages.length <= 1) return;
+
+        const swipeArea = document.getElementById('swipe-area');
+        if (!swipeArea) return;
         
-        // Touch start event to record the starting position
-        imageElement.addEventListener('touchstart', function(e) {
-            touchStartX = e.changedTouches[0].screenX;
-            touchStartY = e.changedTouches[0].screenY;
-        }, { passive: true });
+        // Make the swipe area visible when we have multiple images
+        swipeArea.style.display = 'block';
         
-        // Touch end event to determine if it was a swipe and in which direction
-        imageElement.addEventListener('touchend', function(e) {
-            const touchEndX = e.changedTouches[0].screenX;
-            const touchEndY = e.changedTouches[0].screenY;
-            
-            // Calculate horizontal and vertical distance
-            const distX = touchStartX - touchEndX;
-            const distY = touchStartY - touchEndY;
-            
-            // Check if horizontal swipe is more significant than vertical
-            if (Math.abs(distX) > Math.abs(distY) && Math.abs(distX) > minSwipeDistance) {
-                // Determine direction
-                if (distX > 0) {
-                    // Swipe left - next image
-                    if (currentImageIndex < processedImages.length - 1) {
-                        showImageAtIndex(currentImageIndex + 1);
-                    }
-                } else {
-                    // Swipe right - previous image
-                    if (currentImageIndex > 0) {
-                        showImageAtIndex(currentImageIndex - 1);
-                    }
+        // Clean up previous event listeners to avoid duplicates
+        swipeArea.removeEventListener('touchstart', handleTouchStart);
+        swipeArea.removeEventListener('touchmove', handleTouchMove);
+        swipeArea.removeEventListener('touchend', handleTouchEnd);
+        
+        // Add the new event listeners
+        swipeArea.addEventListener('touchstart', handleTouchStart, { passive: false });
+        swipeArea.addEventListener('touchmove', handleTouchMove, { passive: false });
+        swipeArea.addEventListener('touchend', handleTouchEnd, { passive: false });
+        
+        // Show a visual cue that swiping is available
+        showSwipeHint();
+    }
+    
+    // Touch event handlers
+    function handleTouchStart(e) {
+        // Prevent default only for horizontal swipes
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        
+        // Show visual feedback
+        this.classList.add('swipe-active');
+    }
+    
+    function handleTouchMove(e) {
+        if (!touchStartX || !touchStartY) return;
+        
+        const touchX = e.touches[0].clientX;
+        const touchY = e.touches[0].clientY;
+        
+        // Calculate distance moved
+        const diffX = touchStartX - touchX;
+        const diffY = touchStartY - touchY;
+        
+        // If horizontal movement is greater than vertical, prevent scrolling
+        if (Math.abs(diffX) > Math.abs(diffY)) {
+            e.preventDefault();
+        }
+    }
+    
+    function handleTouchEnd(e) {
+        if (!touchStartX || !touchStartY) return;
+        
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        
+        // Remove visual feedback
+        this.classList.remove('swipe-active');
+        
+        // Calculate distance
+        const distX = touchStartX - touchEndX;
+        const distY = touchStartY - touchEndY;
+        
+        // Reset touch tracking
+        touchStartX = 0;
+        touchStartY = 0;
+        
+        // If it's more of a horizontal swipe than vertical
+        if (Math.abs(distX) > Math.abs(distY) && Math.abs(distX) > minSwipeDistance) {
+            if (distX > 0) {
+                // Swipe left - next image
+                if (currentImageIndex < processedImages.length - 1) {
+                    showImageAtIndex(currentImageIndex + 1);
+                }
+            } else {
+                // Swipe right - previous image
+                if (currentImageIndex > 0) {
+                    showImageAtIndex(currentImageIndex - 1);
                 }
             }
-        }, { passive: true });
+        }
+    }
+    
+    // Show a hint that swiping is available on mobile
+    function showSwipeHint() {
+        // Only show on touch devices with multiple images
+        if (!('ontouchstart' in window) || processedImages.length <= 1) return;
+        
+        const swipeArea = document.getElementById('swipe-area');
+        if (!swipeArea) return;
+        
+        // Create and show swipe hint
+        const hint = document.createElement('div');
+        hint.innerHTML = '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; text-align: center;">Swipe left/right<br>to navigate</div>';
+        hint.style.position = 'absolute';
+        hint.style.top = '0';
+        hint.style.left = '0';
+        hint.style.width = '100%';
+        hint.style.height = '100%';
+        hint.style.zIndex = '20';
+        
+        // Show hint briefly, then remove
+        document.querySelector('.image-wrapper').appendChild(hint);
+        setTimeout(() => {
+            if (hint.parentNode) hint.parentNode.removeChild(hint);
+        }, 1000);
     }
 
-    // Add visual feedback for swipe gestures
+    // Clear existing handlers when page loads
     document.addEventListener('DOMContentLoaded', function() {
-        const resultImage = document.getElementById('result-image');
-        
-        // Show/hide swipe hint on mobile devices
-        if ('ontouchstart' in window && resultImage) {
-            // Create a swipe hint overlay
-            const swipeHint = document.createElement('div');
-            swipeHint.innerHTML = '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; pointer-events: none; z-index: 100; opacity: 0.8;">Swipe to navigate</div>';
-            swipeHint.style.position = 'absolute';
-            swipeHint.style.top = '0';
-            swipeHint.style.left = '0';
-            swipeHint.style.width = '100%';
-            swipeHint.style.height = '100%';
-            swipeHint.style.display = 'none';
+        const swipeArea = document.getElementById('swipe-area');
+        if (swipeArea) {
+            swipeArea.removeEventListener('touchstart', handleTouchStart);
+            swipeArea.removeEventListener('touchmove', handleTouchMove);
+            swipeArea.removeEventListener('touchend', handleTouchEnd);
         }
     });
     </script>
