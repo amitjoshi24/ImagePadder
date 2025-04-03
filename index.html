@@ -142,66 +142,52 @@
             position: relative;
             margin-top: 20px;
             border-radius: 0.25rem;
-            overflow: hidden;
+            overflow: visible;
             display: inline-block;
-            width: auto;
+            width: 100%;
             max-width: 100%;
             text-align: center;
+            padding-bottom: 50px; /* Add space for slideshow controls */
         }
         .image-wrapper {
             position: relative;
             min-height: 300px;  /* Minimum height to ensure controls don't jump */
             display: flex;
+            flex-direction: column;
             justify-content: center;
+            align-items: center;
+            overflow: hidden;
         }
         .image-container img {
             display: block;
             max-width: 100%;
             max-height: 80vh;
+            margin-bottom: 0; /* Remove margin since we're using container padding */
             object-fit: contain;
-            border: 1px solid #eee;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
-        .download-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(128, 128, 128, 0.3) !important;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            cursor: pointer;
-            z-index: 10;
-            border-radius: 0.25rem;
-        }
-        .image-container:hover .download-overlay {
-            opacity: 1;
-        }
-        .download-icon {
-            color: white;
-            font-size: 32px;
-            background-color: rgba(0, 0, 0, 0.5);
-            border-radius: 50%;
-            padding: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-        }
-        .download-container {
-            text-align: center;
-            margin-top: 15px;
-        }
-        #download-link {
-            display: inline-block;
+        .download-button {
             background-color: #34A853;
             color: white;
             text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 4px;
+            padding: 12px 30px;
+            margin-bottom: 15px;
+            display: inline-block;
             margin-top: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            border: none;
+            font-size: 17px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            min-width: 160px;
+            box-sizing: border-box;
         }
-        #download-link:hover {
+        .download-button:hover {
             background-color: #2E8B57;
         }
         .credits {
@@ -576,12 +562,11 @@
         }
         
         #slideshow-controls {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0,0,0,0.5);
-            padding: 10px;
+            position: relative;
+            background: #333;
+            padding: 12px;
+            border-radius: 0 0 4px 4px;
+            margin-top: 10px;
             z-index: 11;
         }
         
@@ -591,7 +576,11 @@
             align-items: center;
             max-width: 300px;
             margin: 0 auto;
+            padding: 5px 0;
         }
+
+        /* Hide console errors in UI */
+        .error { display: block; }
     </style>
 </head>
 <script>
@@ -614,6 +603,10 @@
         // Add click event listeners to tabs
         document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', function() { switchTab(this); }));
     });
+
+    // Global variables
+    let processedZip = null;
+    let fileInput = null;
 </script>
 <body>
     <div class="container">
@@ -694,7 +687,7 @@
                     
                     <div class="color-picker-container">
                         <div>
-                            <label for="bg-color">Background Color:</label>
+                        <label for="bg-color">Background Color:</label>
                             <span class="color-picker-hint">Click rectangle to open color selector</span>
                         </div>
                         <input type="color" id="bg-color" value="#FFFFFF" title="Click to open color picker">
@@ -707,8 +700,8 @@
                         <div class="transparency-option" style="margin-left: 0; margin-bottom: 10px;">
                             <input type="checkbox" id="transparent-bg">
                             <label for="transparent-bg">Fully transparent background (0% opacity)</label>
-                        </div>
-                        
+                </div>
+                
                         <div style="display: flex; align-items: center;">
                             <label for="opacity-slider"><strong>Adjust Background Opacity:</strong></label>
                         </div>
@@ -735,10 +728,17 @@
                     <p><i class="fas fa-image fa-3x"></i></p>
                 </div>
                 
-                <div id="image-container" class="image-container" style="display:none;">
+                <div id="image-container" class="image-container" style="display:none; flex-direction: column;">
+                    <!-- Download button above the image -->
+                    <div style="margin-bottom: 15px; width: 100%; display: flex; justify-content: center; align-items: center;">
+                        <a id="download-link" class="download-button" href="#" onclick="handleDownload(event)">
+                            <i class="fas fa-download"></i>
+                            <span style="flex: 1; text-align: center;">Download All</span>
+                        </a>
+                    </div>
+                    
                     <div class="image-wrapper">
                         <img id="result-image" />
-                        <!-- Better Slideshow UI -->
                         <div id="slideshow-controls" style="display: none; backdrop-filter: blur(5px);">
                             <div class="slideshow-controls-inner">
                                 <button id="prev-image" class="slideshow-button" style="background: transparent; color: white; border: none; font-size: 20px; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s;">
@@ -752,9 +752,6 @@
                                 </button>
                             </div>
                         </div>                        
-                        <a id="download-link" class="download-overlay" download="padded_image.png" style="z-index: 10;">
-                            <i class="fas fa-download download-icon"></i>
-                        </a>
                     </div>
                 </div>
             </div>
@@ -814,8 +811,8 @@
             });
             
             // Activate the clicked tab
-            tab.classList.add('active');
-            
+                tab.classList.add('active');
+                
             // Show the target content
             document.getElementById(targetId).classList.add('active');
             
@@ -1105,6 +1102,12 @@
                     // Process the image
                     const processedImageDataUrl = await padImage(file);
                     
+                    // Store in a single-item zip for consistent download behavior
+                    processedZip = await createZipWithSingleImage(file.name, processedImageDataUrl);
+                    
+                    // Set download handler for single image
+                    downloadLink.onclick = handleDownload;
+                    
                     // Display the processed image
                     resultImage.src = processedImageDataUrl;
                     downloadLink.href = processedImageDataUrl;
@@ -1155,22 +1158,14 @@
                     }
                     
                     if (processedCount > 0) {
-                        // Generate the zip file
+                        // Store the generated zip for download button instead of auto-downloading
                         resultPlaceholder.innerHTML = `<p>Creating ZIP file with ${processedCount} images...</p><p><i class="fas fa-archive fa-3x"></i></p>`;
-                        const zipBlob = await zip.generateAsync({type: 'blob'});
-                        const zipUrl = URL.createObjectURL(zipBlob);
-                        
-                        // Create a download link and trigger it
-                        const link = document.createElement('a');
-                        link.href = zipUrl;
-                        link.download = 'padded_images.zip';
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
+                        processedZip = zip;
                         
                         // Show the first processed image in a slideshow
                         resultPlaceholder.style.display = 'none';
                         imageContainer.style.display = 'block';
+                        imageContainer.style.display = 'flex';  // Make sure it's using flex
                         if (processedImages.length > 0) {
                             showImageAtIndex(0);
                             slideshowControls.style.display = processedImages.length > 1 ? 'block' : 'none';
@@ -1178,7 +1173,7 @@
                         }
 
                         errorMessage.style.color = '#4285F4';
-                        errorMessage.textContent = `Successfully processed ${processedCount} images. ZIP download started.`;
+                        errorMessage.textContent = `Successfully processed ${processedCount} images. Click Download All to save.`;
                     } else {
                         throw new Error('No images could be processed. Please check your files and try again.');
                     }
@@ -1462,6 +1457,64 @@
             script.onerror = () => reject(new Error('Failed to load JSZip. Check your internet connection.'));
             document.head.appendChild(script);
         });
+    }
+
+    // Function to create a zip with a single image
+    async function createZipWithSingleImage(filename, dataUrl) {
+        await loadJSZip();
+        const zip = new JSZip();
+        const base64Data = dataUrl.split(',')[1];
+        zip.file(`padded_${filename}`, base64Data, {base64: true});
+        return zip;
+    }
+
+    // Function to handle the download of multiple images
+    async function handleDownload(e) {
+        e.preventDefault();
+        
+        // Make sure fileInput is available
+        if (!fileInput) {
+            fileInput = document.getElementById('file-input');
+            if (!fileInput) {
+                const errorMessage = document.getElementById('error-message');
+                if (errorMessage) errorMessage.textContent = 'File input not found. Please try again.';
+                return false;
+            }
+        }
+        
+        const errorMessage = document.getElementById('error-message');
+
+        if (!processedZip) {
+            if (errorMessage) errorMessage.textContent = 'No processed images to download.';
+            return false;
+        }
+
+        try {
+            // Create download link
+            const link = document.createElement('a');
+            
+            // Handle single vs multiple files
+            if (fileInput.files.length === 1) {
+                // Process single file download
+                const resultImage = document.getElementById('result-image');
+                link.href = resultImage.src;
+                link.download = `padded_${fileInput.files[0].name}`;
+            } else {
+                // Process zip download
+                const zipBlob = await processedZip.generateAsync({type: 'blob'});
+                link.href = URL.createObjectURL(zipBlob);
+                link.download = 'padded_images.zip';
+            }
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            return false;
+        } catch (error) {
+            console.error('Download error:', error);
+            if (errorMessage) errorMessage.textContent = 'Error creating download: ' + error.message;
+            return false;
+        }
     }
     </script>
 </body>
