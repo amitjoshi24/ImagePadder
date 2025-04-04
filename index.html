@@ -622,6 +622,28 @@
 
         /* Hide console errors in UI */
         .error { display: block; }
+
+        /* Disclaimer styling */
+        .disclaimer {
+            background-color: #f8f9fa;
+            border-left: 4px solid #4285F4;
+            padding: 12px 15px;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #555;
+            border-radius: 0 4px 4px 0;
+            line-height: 1.5;
+        }
+        
+        .disclaimer a {
+            color: #4285F4;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .disclaimer a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <script>
@@ -666,6 +688,14 @@
             <p style="color: #777; font-size: 0.95rem; line-height: 1.5;">
                 Quickly add space around your images with custom padding or pad to specific aspect ratios like 16:9, 4:3, 1:1 square, and more. Perfect for social media posts, video thumbnails, and printing.
             </p>
+        </div>
+        
+        <!-- Disclaimer about large images -->
+        <div class="disclaimer">
+            <strong>Note:</strong> Browser-based tools have resolution limits (typically 16,384 × 16,384 pixels). 
+            For very high-resolution images, please check out the GitHub repository:
+            <br>
+            <a href="https://github.com/amitjoshi24/ImagePadder" target="_blank">https://github.com/amitjoshi24/ImagePadder <i class="fas fa-external-link-alt" style="font-size: 12px;"></i></a>
         </div>
         
         <div id="error-message" class="error"></div>
