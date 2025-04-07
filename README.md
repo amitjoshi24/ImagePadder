@@ -7,7 +7,7 @@ A tool that pads images to any aspect ratio while preserving the original resolu
 - Choose any background color (with optional transparency)
 - Create images with specific aspect ratios
 - Process multiple images at once
-- Works with all common image formats (JPG, PNG, etc.)
+- Works with all common image formats (JPG, PNG, HEIC etc.)
 
 ## Website  
 [https://amitjoshi24.github.io/ImagePadder/](https://amitjoshi24.github.io/ImagePadder/)  
@@ -34,8 +34,21 @@ pip install Pillow
 The image padder can be ran either by passing in command-line arguments or by using the interactive prompt.
 
 **CLI arguments**:
+
+For aspect ratio padding:
 ```
-python3 imagepadder2.py '/Users/apple/Pictures/best_friends_photo.jpg' 16x9
+python3 imagepadder2.py '/Users/apple/Pictures/best_friends_photo.jpg' aspect 16x9 #FFFFFF 100
+                          ^                                            ^      ^     ^       ^
+                          |                                            |      |     |       |
+                      image path                                   mode  ratio  color   opacity
+```
+
+For custom padding:
+```
+python3 imagepadder2.py '/Users/apple/Pictures/best_friends_photo.jpg' custom 20 30 20 30 #000000 50
+                          ^                                            ^      ^  ^  ^  ^   ^       ^
+                          |                                            |      |  |  |  |   |       |
+                      image path                                   mode   top right bottom left color opacity
 ```
 
 **Interactive prompt**:
@@ -46,12 +59,26 @@ python3 imagepadder2.py
 Then follow the prompts:
 ```
 > image's filename to pad: /Users/apple/Pictures/best_friends_photo.jpg
-> enter aspect ratio you desire in the form of WIDTHxHEIGHT, e.g. "4x3": 16x9
+> Choose padding mode ('aspect' for aspect ratio or 'custom' for custom padding): aspect
+> Enter aspect ratio you desire in the form of WIDTHxHEIGHT, e.g. "4x3": 16x9
+> Background color (hex format, e.g. #FFFFFF for white) [default: #FFFFFF]: 
+> Background opacity (0-100%, default: 100): 100
+```
+OR
+```
+> image's filename to pad: /Users/apple/Pictures/best_friends_photo.jpg
+> Choose padding mode ('aspect' for aspect ratio or 'custom' for custom padding): custom
+> Enter top padding (pixels): 20
+> Enter right padding (pixels): 30
+> Enter bottom padding (pixels): 20
+> Enter left padding (pixels): 30
+> Background color (hex format, e.g. #FFFFFF for white) [default: #FFFFFF]: #000000
+> Background opacity (0-100%, default: 100): 50
 ```
 
 ## Working with High-Resolution Images
 
-While most image processing tools in browsers have canvas size limitations (typically around 16,384 × 16,384 pixels), the command-line version of Image Padder can handle much larger images by using Python's PIL/Pillow library directly. For gigapixel images or other extremely large files, the command-line version is the recommended approach.
+While most image processing tools in browsers have canvas size limitations (typically around 16,384 × 16,384 pixels), the command-line version of Image Padder can handle much larger images by using Python's PIL/Pillow library directly. For gigapixel images or other extremely large files, the command-line version is the recommended approach, otherwise the website works fine.
 
 ## Credits
 
