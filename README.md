@@ -14,7 +14,7 @@ A tool that pads images to any aspect ratio while preserving the original resolu
 
 The web version is the easiest way to use Image Padder, with a user-friendly interface and additional options like custom padding.
 
-**Note:** Browser-based tools have resolution limits (typically 16,384 × 16,384 pixels). For very high-resolution images, use the command-line version below.
+**Note:** Browser-based tools have resolution limits (typically 16,384 × 16,384 pixels). For very high-resolution images (or if working with HEIC/HEIF images), use the command-line version below.
 
 ## Installation
 Python 3.4+ is required to run this.
