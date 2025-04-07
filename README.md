@@ -24,10 +24,23 @@ No virtual environment is required for running this. However, if this makes you 
 1. `python3 -m venv .venv`
 2. `source .venv/bin/activate`
 
-You'll also need to install the PIL/Pillow library:
+### Dependencies
+
+Install required dependencies using the requirements.txt file:
+
+```
+pip install -r requirements.txt
+```
+
+This will install:
+- Pillow: For image processing
+- pillow-heif: For HEIC/HEIF support (Apple's image format)
+
+Or install dependencies manually:
 
 ```
 pip install Pillow
+pip install pillow-heif
 ```
 
 ## Usage
@@ -37,7 +50,7 @@ The image padder can be ran either by passing in command-line arguments or by us
 
 For aspect ratio padding:
 ```
-python3 imagepadder2.py '/Users/apple/Pictures/best_friends_photo.jpg' aspect 16x9 #FFFFFF 100
+python3 imagepadder2.py '/Users/apple/Pictures/best_friends_photo.jpg' aspect 16x9 #FFFFFF 255
 ```
 
 | Parameter | Description |
@@ -46,11 +59,11 @@ python3 imagepadder2.py '/Users/apple/Pictures/best_friends_photo.jpg' aspect 16
 | 2: Mode | `aspect` for aspect ratio mode |
 | 3: Ratio | Width and height in format `WxH` (e.g., `16x9`) |
 | 4: Color | Background color in hex format (e.g., `#FFFFFF` for white) |
-| 5: Opacity | Background opacity, 0-100 (e.g., `100` for fully opaque) |
+| 5: Opacity | Background opacity, 0-255 (e.g., `255` for fully opaque) |
 
 For custom padding:
 ```
-python3 imagepadder2.py '/Users/apple/Pictures/best_friends_photo.jpg' custom 20 30 20 30 #000000 50
+python3 imagepadder2.py '/Users/apple/Pictures/best_friends_photo.jpg' custom 20 30 20 30 #000000 128
 ```
 
 | Parameter | Description |
@@ -59,7 +72,7 @@ python3 imagepadder2.py '/Users/apple/Pictures/best_friends_photo.jpg' custom 20
 | 2: Mode | `custom` for custom padding mode |
 | 3-6: Padding | Four values for padding in pixels: `top right bottom left` |
 | 7: Color | Background color in hex format (e.g., `#000000` for black) |
-| 8: Opacity | Background opacity, 0-100 (e.g., `50` for semi-transparent) |
+| 8: Opacity | Background opacity, 0-255 (e.g., `128` for half-transparent) |
 
 **Interactive prompt**:
 ```
@@ -72,7 +85,7 @@ Then follow the prompts:
 > Choose padding mode ('aspect' for aspect ratio or 'custom' for custom padding): aspect
 > Enter aspect ratio you desire in the form of WIDTHxHEIGHT, e.g. "4x3": 16x9
 > Background color (hex format, e.g. #FFFFFF for white) [default: #FFFFFF]: 
-> Background opacity (0-100%, default: 100): 100
+> Background opacity (0-255, default: 255): 255
 ```
 OR
 ```
@@ -83,7 +96,7 @@ OR
 > Enter bottom padding (pixels): 20
 > Enter left padding (pixels): 30
 > Background color (hex format, e.g. #FFFFFF for white) [default: #FFFFFF]: #000000
-> Background opacity (0-100%, default: 100): 50
+> Background opacity (0-255, default: 255): 128
 ```
 
 ## Working with High-Resolution Images
