@@ -38,18 +38,28 @@ The image padder can be ran either by passing in command-line arguments or by us
 For aspect ratio padding:
 ```
 python3 imagepadder2.py '/Users/apple/Pictures/best_friends_photo.jpg' aspect 16x9 #FFFFFF 100
-                          ^                                            ^      ^     ^       ^
-                          |                                            |      |     |       |
-                      image path                                   mode  ratio  color   opacity
 ```
+
+| Parameter | Description |
+|-----------|-------------|
+| 1: Image path | Path to the image file |
+| 2: Mode | `aspect` for aspect ratio mode |
+| 3: Ratio | Width and height in format `WxH` (e.g., `16x9`) |
+| 4: Color | Background color in hex format (e.g., `#FFFFFF` for white) |
+| 5: Opacity | Background opacity, 0-100 (e.g., `100` for fully opaque) |
 
 For custom padding:
 ```
 python3 imagepadder2.py '/Users/apple/Pictures/best_friends_photo.jpg' custom 20 30 20 30 #000000 50
-                          ^                                            ^      ^  ^  ^  ^   ^       ^
-                          |                                            |      |  |  |  |   |       |
-                      image path                                   mode   top right bottom left color opacity
 ```
+
+| Parameter | Description |
+|-----------|-------------|
+| 1: Image path | Path to the image file |
+| 2: Mode | `custom` for custom padding mode |
+| 3-6: Padding | Four values for padding in pixels: `top right bottom left` |
+| 7: Color | Background color in hex format (e.g., `#000000` for black) |
+| 8: Opacity | Background opacity, 0-100 (e.g., `50` for semi-transparent) |
 
 **Interactive prompt**:
 ```
