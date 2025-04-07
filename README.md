@@ -1,5 +1,10 @@
 # Image Padder
-A tool that pads images to any aspect ratio while preserving the original resolution. Add space around your images with custom padding or convert to specific aspect ratios like 16:9, 4:3, 1:1 square, and more.
+
+<p align="center">
+  <img src="https://github.com/amitjoshi24/ImagePadder/raw/main/favicon.jpg" width="150" alt="Image Padder Logo">
+</p>
+
+A tool that pads images to any aspect ratio while preserving the original resolution. Add space around your images with custom padding or convert to specific aspect ratios like 16:9, 4:3, 1:1 square, and more. Perfect for social media posts, video thumbnails, and printing.
 
 ## Features
 
