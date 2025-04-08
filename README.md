@@ -146,21 +146,10 @@ The program and the image padding algorithm were originally written by Amit Josh
 
 ## Support the Project
 
-If you find this tool useful, consider supporting its development:
+If you find this tool useful, consider supporting its development through one of these options:
 
-<div class="donation-section">
-    <div class="donation-title">Find this tool useful? Consider supporting the development!</div>
-    <div class="donation-buttons">
-        <a href="https://paypal.me/amitjoshi168" target="_blank" class="donation-button paypal-button">
-            <i class="fab fa-paypal"></i> PayPal
-        </a>
-        <a href="https://venmo.com/Amit-Joshi-11" target="_blank" class="donation-button venmo-button">
-            <i class="fab fa-vimeo-v"></i> Venmo
-        </a>
-        <a href="https://ko-fi.com/amitjoshi24" target="_blank" class="donation-button ko-fi-button">
-            <i class="fas fa-coffee"></i> Ko-fi
-        </a>
-        <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
-        <script type='text/javascript'>kofiwidget2.init('Support me on Ko-fi', '#f57373', 'I2I81CDN0L');kofiwidget2.draw();</script>
-    </div>
-</div>
+- [PayPal](https://paypal.me/amitjoshi168)
+- [Venmo](https://venmo.com/Amit-Joshi-11) 
+- [Ko-fi](https://ko-fi.com/amitjoshi24)
+
+Thank you for your support!
