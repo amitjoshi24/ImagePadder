@@ -9,9 +9,9 @@ A tool that pads images to any aspect ratio while preserving the original resolu
 ## Features
 
 - Preserve original image/video resolution and quality
-- Choose any background color (with optional transparency)
+- Choose any background color, with optional transparency
 - Create images with specific aspect ratios
-- Process multiple images at once
+- Process multiple images at once (website only, for now)
 - Pad videos to desired aspect ratios (command-line version only)
 - Works with all common image formats (JPG, PNG, HEIC etc.)
 
@@ -63,7 +63,7 @@ python3 imagepadder2.py '/Users/apple/Pictures/best_friends_photo.jpg' aspect 16
 
 | Parameter | Description |
 |-----------|-------------|
-| 1: Image path | Path to the image file |
+| 1: Image/Video path | Path to the image/video file |
 | 2: Mode | `aspect` for aspect ratio mode |
 | 3: Ratio | Width and height in format `WxH` (e.g., `16x9`) |
 | 4: Color | Background color in hex format (e.g., `#FFFFFF` for white) |
@@ -82,7 +82,7 @@ python3 imagepadder2.py '/Users/apple/Pictures/best_friends_photo.jpg' custom 20
 | 7: Color | Background color in hex format (e.g., `#000000` for black) |
 | 8: Opacity | Background opacity, 0-255 (e.g., `128` for half-transparent) |
 
-### Video Padding (Command-line only)
+**Video Padding (Command-line only)**
 
 For video aspect ratio padding:
 ```
@@ -94,7 +94,7 @@ For video custom padding:
 python3 imagepadder2.py '/Users/apple/Videos/vacation.mp4' custom 50 50 50 50 #0000FF 255
 ```
 
-The parameters work the same way as for images, but the tool will automatically detect if the file is a video based on the extension (mp4, avi, mov, mkv, webm, wmv).
+The parameters work the same way as for images, but the tool will automatically detect if the file is a video based on the extension (mp4, avi, mov, mkv, webm, wmv). Note that the script is still called "imagepadder2.py" even for videos.
 
 **Note:** Video processing takes longer than image processing, especially for longer videos.
 
