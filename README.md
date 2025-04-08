@@ -98,7 +98,9 @@ The parameters work the same way as for images, but the tool will automatically 
 
 **Note:** Video processing takes longer than image processing, especially for longer videos.
 
-**Interactive prompt**:
+### Interactive Prompt (Works with both Images and Videos)
+
+You can use the interactive prompt with both images and videos - the tool will automatically detect the file type:
 ```
 python3 imagepadder2.py
 ```
@@ -109,6 +111,14 @@ Then follow the prompts:
 > Choose padding mode ('aspect' for aspect ratio or 'custom' for custom padding): aspect
 > Enter aspect ratio you desire in the form of WIDTHxHEIGHT, e.g. "4x3": 16x9
 > Background color (hex format, e.g. #FFFFFF for white) [default: #FFFFFF]: 
+> Background opacity (0-255, default: 255): 255
+```
+OR
+```
+> image's filename to pad: /Users/apple/Videos/vacation.mp4
+> Choose padding mode ('aspect' for aspect ratio or 'custom' for custom padding): aspect
+> Enter aspect ratio you desire in the form of WIDTHxHEIGHT, e.g. "4x3": 16x9
+> Background color (hex format, e.g. #FFFFFF for white) [default: #FFFFFF]: #000000
 > Background opacity (0-255, default: 255): 255
 ```
 OR

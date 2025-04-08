@@ -398,4 +398,4 @@ if __name__ == "__main__":
             if file_path.suffix.lower() in ['.heic', '.heif'] and save_path.suffix.lower() not in ['.heic', '.heif']:
                 print(f"Note: Original HEIC/HEIF image converted to {save_path.suffix} format")
             print(f"Done! New image size: {result.size[0]}x{result.size[1]} pixels")
-            #print(f"Image saved with opacity level {opacity}/255 background")
+            # print(f"Image saved with opacity level {opacity}/255 background")
