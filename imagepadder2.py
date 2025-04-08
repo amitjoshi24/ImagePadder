@@ -13,20 +13,20 @@ try:
     from pillow_heif import register_heif_opener
     register_heif_opener()
     HEIF_SUPPORT = True
-    print("HEIC/HEIF support enabled")
+    #print("HEIC/HEIF support enabled")
 except ImportError:
     HEIF_SUPPORT = False
-    print("HEIC/HEIF support not available. Install with 'pip install pillow-heif'")
+    #print("HEIC/HEIF support not available. Install with 'pip install pillow-heif'")
 
 # Add these imports near the top of the file
 try:
     import moviepy.editor as mp
     from moviepy.video.fx.all import resize
     VIDEO_SUPPORT = True
-    print("Video support enabled")
+    #print("Video support enabled")
 except ImportError:
     VIDEO_SUPPORT = False
-    print("Video support not available. Install with 'pip install moviepy'")
+    #print("Video support not available. Install with 'pip install moviepy'")
 
 def check_heif_support(file_path):
     """Check if we're trying to open a HEIC/HEIF file without support."""
