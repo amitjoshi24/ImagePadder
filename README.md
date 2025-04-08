@@ -143,3 +143,12 @@ The command-line version supports padding videos to different aspect ratios or a
 ## Credits
 
 The program and the image padding algorithm were originally written by Amit Joshi ([@amitjoshi24](https://github.com/amitjoshi24)). Code improvements were made by Jeffrey Wang ([@jeffw16](https://github.com/jeffw16)).
+
+## Support the Project
+
+If you find this tool useful, consider supporting its development:
+
+<p>
+  <a href="https://www.buymeacoffee.com/amitjoshi24" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+  <a href="https://paypal.me/amitjosh24" target="_blank"><img src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" alt="Donate with PayPal" style="height: 60px !important;" ></a>
+</p>
