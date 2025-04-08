@@ -8,10 +8,11 @@ A tool that pads images to any aspect ratio while preserving the original resolu
 
 ## Features
 
-- Preserve original image resolution and quality
+- Preserve original image/video resolution and quality
 - Choose any background color (with optional transparency)
 - Create images with specific aspect ratios
 - Process multiple images at once
+- Pad videos to desired aspect ratios (command-line version only)
 - Works with all common image formats (JPG, PNG, HEIC etc.)
 
 ## Website  
@@ -19,7 +20,7 @@ A tool that pads images to any aspect ratio while preserving the original resolu
 
 The web version is the easiest way to use Image Padder, with a user-friendly interface and additional options like custom padding.
 
-**Note:** Browser-based tools have resolution limits (typically 16,384 × 16,384 pixels). For very high-resolution images (or if working with HEIC/HEIF images), use the command-line version below.
+**Note:** Browser-based tools have resolution limits (typically 16,384 × 16,384 pixels). For very high-resolution images, HEIC/HEIF images, or video padding, use the command-line version below.
 
 ## Installation
 Python 3.4+ is required to run this.
@@ -40,11 +41,13 @@ pip install -r requirements.txt
 This will install:
 - Pillow: For image processing
 - pillow-heif: For HEIC/HEIF support (Apple's image format)
+- moviepy: For video padding support
 
 Or install dependencies manually:
 
 ```
 pip install Pillow
+pip install moviepy
 pip install pillow-heif
 ```
 
@@ -79,6 +82,22 @@ python3 imagepadder2.py '/Users/apple/Pictures/best_friends_photo.jpg' custom 20
 | 7: Color | Background color in hex format (e.g., `#000000` for black) |
 | 8: Opacity | Background opacity, 0-255 (e.g., `128` for half-transparent) |
 
+### Video Padding (Command-line only)
+
+For video aspect ratio padding:
+```
+python3 imagepadder2.py '/Users/apple/Videos/vacation.mp4' aspect 16x9 #000000 255
+```
+
+For video custom padding:
+```
+python3 imagepadder2.py '/Users/apple/Videos/vacation.mp4' custom 50 50 50 50 #0000FF 255
+```
+
+The parameters work the same way as for images, but the tool will automatically detect if the file is a video based on the extension (mp4, avi, mov, mkv, webm, wmv).
+
+**Note:** Video processing takes longer than image processing, especially for longer videos.
+
 **Interactive prompt**:
 ```
 python3 imagepadder2.py
@@ -107,6 +126,9 @@ OR
 ## Working with High-Resolution Images
 
 While most image processing tools in browsers have canvas size limitations (typically around 16,384 × 16,384 pixels), the command-line version of Image Padder can handle much larger images by using Python's PIL/Pillow library directly. For gigapixel images or other extremely large files, the command-line version is the recommended approach, otherwise the website works fine.
+
+## Working with Videos
+The command-line version supports padding videos to different aspect ratios or adding custom padding. Supported formats include MP4, AVI, MOV, MKV, WEBM, and WMV. The padding is applied to each frame while preserving the original audio track. Due to the processing required, video padding may take some time depending on the length and resolution of the video.
 
 ## Credits
 
