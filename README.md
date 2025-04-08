@@ -1,24 +1,25 @@
-# Image Padder
+# Image and Video Padder
 
 <p align="center">
   <img src="https://github.com/amitjoshi24/ImagePadder/raw/main/favicon.jpg" width="150" alt="Image Padder Logo">
 </p>
 
-A tool that pads images to any aspect ratio while preserving the original resolution. Add space around your images with custom padding or convert to specific aspect ratios like 16:9, 4:3, 1:1 square, and more. Perfect for social media posts, video thumbnails, and printing.
+A tool that pads images or videos to any aspect ratio while preserving the original resolution. Add space around your images/videos with custom padding or convert to specific aspect ratios like 16:9, 4:3, 1:1 square, and more. Perfect for social media posts or vlogs, video thumbnails, and printing.
 
 ## Features
 
 - Preserve original image/video resolution and quality
 - Choose any background color, with optional transparency
-- Create images with specific aspect ratios
+- Pad images with specific aspect ratios or custom padding
 - Process multiple images at once (website only, for now)
-- Pad videos to desired aspect ratios (command-line version only)
+- Pad videos (command-line version only)
 - Works with all common image formats (JPG, PNG, HEIC etc.)
+- Works with all common video formats (mp4, mov, etc.)
 
 ## Website  
 [https://amitjoshi24.github.io/ImagePadder/](https://amitjoshi24.github.io/ImagePadder/)  
 
-The web version is the easiest way to use Image Padder, with a user-friendly interface and additional options like custom padding.
+The web version is the easiest way to use Image Padder, with a user-friendly interface and additional options like custom padding. The website does NOT support video padding, for that keep reading.
 
 **Note:** Browser-based tools have resolution limits (typically 16,384 × 16,384 pixels). For very high-resolution images, HEIC/HEIF images, or video padding, use the command-line version below.
 
