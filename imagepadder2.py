@@ -183,7 +183,7 @@ if __name__ == "__main__":
             # JPEG doesn't support transparency, convert to RGB
             result = result.convert('RGB')
             
-        result.save(save_path, quality=95)
+        result.save(save_path, quality=100)
         
         # If the original is HEIC/HEIF but we're saving as another format, mention it
         if file_path.suffix.lower() in ['.heic', '.heif'] and save_path.suffix.lower() not in ['.heic', '.heif']:
