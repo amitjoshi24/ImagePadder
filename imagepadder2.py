@@ -13,20 +13,20 @@ try:
     from pillow_heif import register_heif_opener
     register_heif_opener()
     HEIF_SUPPORT = True
-    #print("HEIC/HEIF support enabled")
+    print("HEIC/HEIF support enabled")
 except ImportError:
     HEIF_SUPPORT = False
-    #print("HEIC/HEIF support not available. Install with 'pip install pillow-heif'")
+    print("HEIC/HEIF support not available. Install with 'pip install pillow-heif'")
 
 # Add these imports near the top of the file
 try:
     import moviepy.editor as mp
     from moviepy.video.fx.all import resize
     VIDEO_SUPPORT = True
-    #print("Video support enabled")
+    print("Video support enabled")
 except ImportError:
     VIDEO_SUPPORT = False
-    #print("Video support not available. Install with 'pip install moviepy'")
+    print("Video support not available. Install with 'pip install moviepy'")
 
 def check_heif_support(file_path):
     """Check if we're trying to open a HEIC/HEIF file without support."""
@@ -123,9 +123,9 @@ def pad_video_aspect_ratio(file_path: Path, nw: int, nh: int, bg_color=(255,255,
     # Generate the output path
     padded_save_path = file_path.parent / (file_path.stem + f'-padded_{nw}x{nh}' + file_path.suffix)
     
-    # Convert bg_color to RGB if it has alpha
-    if len(bg_color) == 4:  # RGBA
-        bg_color = bg_color[:3]  # Extract RGB
+    # Ensure colors are in 0-255 range (sometimes they come in 0-1 range)
+    bg_color = tuple(int(c * 255) if c <= 1.0 else c for c in bg_color)
+    print(f"Using background color (RGB): {bg_color}")
     
     # Calculate the target aspect ratio
     target_ratio = nw / nh
@@ -141,8 +141,10 @@ def pad_video_aspect_ratio(file_path: Path, nw: int, nh: int, bg_color=(255,255,
         top_pad = padding // 2
         
         # Create a function to pad each frame
-        def pad_frame(frame):
+        def pad_frame(get_frame, t):
             import numpy as np
+            frame = get_frame(t)
+            print(f"Debug - Frame shape: {frame.shape}, bg_color before scaling: {bg_color}")
             h, w = frame.shape[:2]
             color = np.array(bg_color) / 255.0  # moviepy uses 0-1 scale for colors
             padded = np.zeros((new_height, w, 3))
@@ -150,6 +152,8 @@ def pad_video_aspect_ratio(file_path: Path, nw: int, nh: int, bg_color=(255,255,
             # Fill with background color
             for i in range(3):  # RGB channels
                 padded[:, :, i] = color[i]
+            
+            print(f"Debug - Color after scaling: {color}")
             
             # Insert original frame in the middle
             padded[top_pad:top_pad+h, :] = frame
@@ -164,8 +168,10 @@ def pad_video_aspect_ratio(file_path: Path, nw: int, nh: int, bg_color=(255,255,
         left_pad = padding // 2
         
         # Create a function to pad each frame
-        def pad_frame(frame):
+        def pad_frame(get_frame, t):
             import numpy as np
+            frame = get_frame(t)
+            print(f"Debug - Frame shape: {frame.shape}, bg_color before scaling: {bg_color}")
             h, w = frame.shape[:2]
             color = np.array(bg_color) / 255.0  # moviepy uses 0-1 scale for colors
             padded = np.zeros((h, new_width, 3))
@@ -173,6 +179,8 @@ def pad_video_aspect_ratio(file_path: Path, nw: int, nh: int, bg_color=(255,255,
             # Fill with background color
             for i in range(3):  # RGB channels
                 padded[:, :, i] = color[i]
+            
+            print(f"Debug - Color after scaling: {color}")
             
             # Insert original frame in the middle
             padded[:, left_pad:left_pad+w] = frame
@@ -209,17 +217,18 @@ def pad_video_custom(file_path: Path, top: int, right: int, bottom: int, left: i
     # Generate the output path
     padded_save_path = file_path.parent / (file_path.stem + f'-padded_custom' + file_path.suffix)
     
-    # Convert bg_color to RGB if it has alpha
-    if len(bg_color) == 4:  # RGBA
-        bg_color = bg_color[:3]  # Extract RGB
+    # Ensure colors are in 0-255 range (sometimes they come in 0-1 range)
+    bg_color = tuple(int(c * 255) if c <= 1.0 else c for c in bg_color)
+    print(f"Using background color (RGB): {bg_color}")
     
     # Calculate new dimensions
     new_width = width + left + right
     new_height = height + top + bottom
     
     # Create a function to pad each frame
-    def pad_frame(frame):
+    def pad_frame(get_frame, t):
         import numpy as np
+        frame = get_frame(t)
         h, w = frame.shape[:2]
         color = np.array(bg_color) / 255.0  # moviepy uses 0-1 scale for colors
         padded = np.zeros((new_height, new_width, 3))

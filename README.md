@@ -44,6 +44,13 @@ This will install:
 - pillow-heif: For HEIC/HEIF support (Apple's image format)
 - moviepy: For video padding support
 
+### External Dependencies
+
+For video padding functionality, FFmpeg needs to be installed on your system:
+- macOS: `brew install ffmpeg`
+- Ubuntu/Linux: `sudo apt-get install ffmpeg`
+- Windows: Download from [ffmpeg.org](https://ffmpeg.org/download.html) or use `choco install ffmpeg` with Chocolatey
+
 Or install dependencies manually:
 
 ```
@@ -51,6 +58,8 @@ pip install Pillow
 pip install moviepy
 pip install pillow-heif
 ```
+
+**Note:** The command-line tool will automatically detect if you're missing any required dependencies.
 
 ## Usage
 The image padder can be ran either by passing in command-line arguments or by using the interactive prompt.
