@@ -55,8 +55,9 @@ def hex_to_rgb(hex_color):
     return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
 
 def get_background_color(hex_color, opacity=255):
-    """Convert hex color and opacity to RGBA tuple."""
+    """Convert hex color and opacity to RGBA tuple (values 0-255)."""
     rgb = hex_to_rgb(hex_color)
+    # Ensure we're working with 0-255 scale
     alpha = opacity  # Now directly using 0-255 scale
     return rgb + (alpha,) if len(rgb) == 3 else rgb
 
@@ -123,9 +124,12 @@ def pad_video_aspect_ratio(file_path: Path, nw: int, nh: int, bg_color=(255,255,
     # Generate the output path
     padded_save_path = file_path.parent / (file_path.stem + f'-padded_{nw}x{nh}' + file_path.suffix)
     
-    # Ensure colors are in 0-255 range (sometimes they come in 0-1 range)
-    bg_color = tuple(int(c * 255) if c <= 1.0 else c for c in bg_color)
-    print(f"Using background color (RGB): {bg_color}")
+    # Make sure we have just RGB (no alpha) for video processing
+    if len(bg_color) == 4:  # RGBA format
+        bg_color = bg_color[:3]  # Take just RGB values
+    
+    # Verify color values are in correct range (0-255)
+    print(f"Using background color for video: RGB {bg_color} (should be values 0-255)")
     
     # Calculate the target aspect ratio
     target_ratio = nw / nh
@@ -144,16 +148,15 @@ def pad_video_aspect_ratio(file_path: Path, nw: int, nh: int, bg_color=(255,255,
         def pad_frame(get_frame, t):
             import numpy as np
             frame = get_frame(t)
-            print(f"Debug - Frame shape: {frame.shape}, bg_color before scaling: {bg_color}")
+            # Note: frame is 0-1 float values, bg_color is 0-255 integers
             h, w = frame.shape[:2]
-            color = np.array(bg_color) / 255.0  # moviepy uses 0-1 scale for colors
+            color = np.array(bg_color, dtype=np.float32)  # moviepy uses 0-1 scale for colors
             padded = np.zeros((new_height, w, 3))
             
+            #print(f"Using color values (0-1 scale): {color}")
             # Fill with background color
             for i in range(3):  # RGB channels
                 padded[:, :, i] = color[i]
-            
-            print(f"Debug - Color after scaling: {color}")
             
             # Insert original frame in the middle
             padded[top_pad:top_pad+h, :] = frame
@@ -171,16 +174,15 @@ def pad_video_aspect_ratio(file_path: Path, nw: int, nh: int, bg_color=(255,255,
         def pad_frame(get_frame, t):
             import numpy as np
             frame = get_frame(t)
-            print(f"Debug - Frame shape: {frame.shape}, bg_color before scaling: {bg_color}")
+            # Note: frame is 0-1 float values, bg_color is 0-255 integers
             h, w = frame.shape[:2]
-            color = np.array(bg_color) / 255.0  # moviepy uses 0-1 scale for colors
+            color = np.array(bg_color, dtype=np.float32)  # moviepy uses 0-1 scale for colors
             padded = np.zeros((h, new_width, 3))
             
+            #print(f"Using color values (0-1 scale): {color}")
             # Fill with background color
             for i in range(3):  # RGB channels
                 padded[:, :, i] = color[i]
-            
-            print(f"Debug - Color after scaling: {color}")
             
             # Insert original frame in the middle
             padded[:, left_pad:left_pad+w] = frame
@@ -191,17 +193,17 @@ def pad_video_aspect_ratio(file_path: Path, nw: int, nh: int, bg_color=(255,255,
     
     # Save the padded video
     print(f"Processing video. This may take some time depending on the video length...")
+    
     padded_video.write_videofile(str(padded_save_path), 
                                  codec='libx264', 
                                  audio_codec='aac',
-                                 preset='medium',
+                                 preset='fast',  # Use faster preset for better speed
                                  threads=4)
     
     # Close the video objects to free resources
     video.close()
     padded_video.close()
     
-    print(f"Video saved to: {padded_save_path}")
     return padded_save_path
 
 def pad_video_custom(file_path: Path, top: int, right: int, bottom: int, left: int, bg_color=(255,255,255), opacity=255):
@@ -217,10 +219,12 @@ def pad_video_custom(file_path: Path, top: int, right: int, bottom: int, left: i
     # Generate the output path
     padded_save_path = file_path.parent / (file_path.stem + f'-padded_custom' + file_path.suffix)
     
-    # Ensure colors are in 0-255 range (sometimes they come in 0-1 range)
-    bg_color = tuple(int(c * 255) if c <= 1.0 else c for c in bg_color)
-    print(f"Using background color (RGB): {bg_color}")
+    # Make sure we have just RGB (no alpha) for video processing
+    if len(bg_color) == 4:  # RGBA format
+        bg_color = bg_color[:3]  # Take just RGB values
     
+    # Verify color values are in correct range (0-255)
+    print(f"Using background color for video: RGB {bg_color} (should be values 0-255)")
     # Calculate new dimensions
     new_width = width + left + right
     new_height = height + top + bottom
@@ -230,9 +234,10 @@ def pad_video_custom(file_path: Path, top: int, right: int, bottom: int, left: i
         import numpy as np
         frame = get_frame(t)
         h, w = frame.shape[:2]
-        color = np.array(bg_color) / 255.0  # moviepy uses 0-1 scale for colors
+        color = np.array(bg_color, dtype=np.float32)  # moviepy uses 0-1 scale for colors
         padded = np.zeros((new_height, new_width, 3))
         
+        #print(f"Using color values (0-1 scale): {color}")
         # Fill with background color
         for i in range(3):  # RGB channels
             padded[:, :, i] = color[i]
@@ -249,14 +254,13 @@ def pad_video_custom(file_path: Path, top: int, right: int, bottom: int, left: i
     padded_video.write_videofile(str(padded_save_path), 
                                  codec='libx264', 
                                  audio_codec='aac',
-                                 preset='medium',
+                                 preset='fast',  # Use faster preset for better speed
                                  threads=4)
     
     # Close the video objects to free resources
     video.close()
     padded_video.close()
     
-    print(f"Video saved to: {padded_save_path}")
     return padded_save_path
 
 def get_padding_mode(sys_args):
