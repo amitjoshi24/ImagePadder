@@ -160,7 +160,7 @@ The command-line version supports padding videos to different aspect ratios or a
 
 ### GUI Mode
 
-![GUI Screenshot](https://github.com/amitjoshi24/ImagePadder/raw/main/guiss.jpg)
+![GUI Screenshot](https://github.com/amitjoshi24/ImagePadder/blob/main/guiss.jpg)
 
 The application now includes a graphical user interface:
 
