@@ -159,6 +159,17 @@ OR
 > Background opacity (0-255, default: 255): 128
 ```
 
+##### Examples
+
+| **Command** | **Description** |
+|-------------|-----------------|
+| `python -m imagepadder2 image.jpg` | Interactive command-line mode |
+| `python imagepaddergui.py` | Launch the graphical user interface |
+| `python -m imagepadder2 image.jpg aspect 16x9` | Pad to 16:9 aspect ratio |
+| `python -m imagepadder2 image.jpg custom 10 20 30 40` | Custom padding (top, right, bottom, left) |
+| `python -m imagepadder2 image.jpg aspect 1x1 #FF0000 128` | Square with semi-transparent (128 out of 255) red (#FF0000) background |
+
+
 ### Notes ###
 
 #### Working with High-Resolution Images ####
@@ -171,16 +182,6 @@ The command-line version and python GUI support padding videos to different aspe
 The parameters work the same way as for images, but the tool will automatically detect if the file is a video based on the extension (mp4, avi, mov, mkv, webm, wmv). Note that the script is still called "imagepadder2.py" even for videos. 
 
 You can use the interactive prompt, CLI arguments, or GUI with both images and videos - the tool will automatically detect the file type and pad accordingly:
-
-#### Examples ####
-
-| **Command** | **Description** |
-|-------------|-----------------|
-| `python -m imagepadder2 image.jpg` | Interactive command-line mode |
-| `python imagepaddergui.py` | Launch the graphical user interface |
-| `python -m imagepadder2 image.jpg aspect 16x9` | Pad to 16:9 aspect ratio |
-| `python -m imagepadder2 image.jpg custom 10 20 30 40` | Custom padding (top, right, bottom, left) |
-| `python -m imagepadder2 image.jpg aspect 1x1 #FF0000 128` | Square with semi-transparent (128 out of 255) red (#FF0000) background |
 
 ## Credits
 
