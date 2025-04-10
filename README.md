@@ -23,9 +23,9 @@ The web version is the easiest way to use Image Padder, with a user-friendly int
 
 **Note:** Browser-based tools have resolution limits (typically 16,384 × 16,384 pixels). For very high-resolution images, HEIC/HEIF images, or video padding, use the command-line version or Python Graphical-User-Interface (GUI) below.
 
-## Padding Images and Videos Locally
+## Padding Images and Videos Locally ##
 
-### Installation
+### Installation ###
 Python 3.4+ is required to run this.
 
 No virtual environment is required for running this. However, if this makes you feel more comfortable, you can set one up by using the following code:
@@ -78,11 +78,11 @@ Fortunately, I have just made a new GUI if you prefer
 5. Select a background color (with optional transparency)
 6. Click "Process" to create your padded image/video
 
-#### Command Line Mode
+#### Command Line Mode ####
 
 The image padder can be ran either by passing in command-line arguments to `imagepadder2.py` or by using the interactive prompt also within `imagepadder2.py`. 
 
-#####CLI arguments#####:
+##### CLI arguments #####:
 
 **Image Padding**
 
@@ -161,11 +161,11 @@ OR
 
 ### Notes ###
 
-####Working with High-Resolution Images####
+#### Working with High-Resolution Images ####
 
 While most image processing tools in browsers have canvas size limitations (typically around 16,384 × 16,384 pixels), the command-line version of Image Padder can handle much larger images by using Python's PIL/Pillow library directly. For gigapixel images, or other extremely large files, the command-line version or GUI are needed, otherwise the website works fine.
 
-####Working with Videos####
+#### Working with Videos ####
 The command-line version and python GUI support padding videos to different aspect ratios or adding custom padding. Supported formats include MP4, AVI, MOV, MKV, WEBM, and WMV. The padding is applied to each frame while preserving the original audio track. Due to the processing required, video padding may take some time depending on the length and resolution of the video, but progress is shown in command line, and somewhat in the logs section of the GUI.
 
 The parameters work the same way as for images, but the tool will automatically detect if the file is a video based on the extension (mp4, avi, mov, mkv, webm, wmv). Note that the script is still called "imagepadder2.py" even for videos. 
