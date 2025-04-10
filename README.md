@@ -78,7 +78,7 @@ Fortunately, I have just made a new GUI if you prefer
 5. Select a background color (with optional transparency)
 6. Click "Process" to create your padded image/video
 
-#### Command Line Mode ####
+#### Command Line Mode
 
 The image padder can be ran either by passing in command-line arguments to `imagepadder2.py` or by using the interactive prompt also within `imagepadder2.py`. 
 
