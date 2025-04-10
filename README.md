@@ -23,7 +23,9 @@ The web version is the easiest way to use Image Padder, with a user-friendly int
 
 **Note:** Browser-based tools have resolution limits (typically 16,384 × 16,384 pixels). For very high-resolution images, HEIC/HEIF images, or video padding, use the command-line version or Python Graphical-User-Interface (GUI) below.
 
-## Installation
+## Padding Images and Videos Locally
+
+### Installation
 Python 3.4+ is required to run this.
 
 No virtual environment is required for running this. However, if this makes you feel more comfortable, you can set one up by using the following code:
@@ -45,20 +47,7 @@ This will install:
 - moviepy: For video padding support
 - tkinter: For GUI (included with standard Python)
 
-### External Dependencies
-
-For the GUI version:
-- Standard Python installation (includes tkinter)
-
-To run the GUI:
-- `python imagepaddergui.py`
-
-For video padding functionality, FFmpeg needs to be installed on your system:
-- macOS: `brew install ffmpeg`
-- Ubuntu/Linux: `sudo apt-get install ffmpeg`
-- Windows: Download from [ffmpeg.org](https://ffmpeg.org/download.html) or use `choco install ffmpeg` with Chocolatey
-
-Or install dependencies manually:
+Or install Python dependencies manually:
 
 ```
 pip install Pillow
@@ -66,14 +55,38 @@ pip install moviepy
 pip install pillow-heif
 ```
 
+### External Dependencies
+
+For video padding functionality, FFmpeg needs to be installed on your system:
+- macOS: `brew install ffmpeg`
+- Ubuntu/Linux: `sudo apt-get install ffmpeg`
+- Windows: Download from [ffmpeg.org](https://ffmpeg.org/download.html) or use `choco install ffmpeg` with Chocolatey
+
 **Note:** The command-line tool will automatically detect if you're missing any required dependencies.
 
-## Usage
-The image padder can be ran either by passing in command-line arguments or by using the interactive prompt.
+### Usage
+Fortunately, I have just made a new GUI if you prefer
 
-**CLI arguments**:
+#### GUI Mode
 
-For aspect ratio padding:
+![GUI Screenshot](https://github.com/amitjoshi24/ImagePadder/blob/main/guiss.jpg)
+
+1. Run: `python imagepaddergui.py`
+2. Select an image or video using the "Browse" button
+3. Choose between "Aspect Ratio" or "Custom Padding" modes
+4. Configure your padding settings
+5. Select a background color (with optional transparency)
+6. Click "Process" to create your padded image/video
+
+#### Command Line Mode
+
+The image padder can be ran either by passing in command-line arguments to `imagepadder2.py` or by using the interactive prompt also within `imagepadder2.py`. 
+
+#####CLI arguments#####:
+
+**Image Padding**
+
+For image aspect ratio padding:
 ```
 python3 imagepadder2.py '/Users/apple/Pictures/best_friends_photo.jpg' aspect 16x9 #FFFFFF 255
 ```
@@ -86,7 +99,7 @@ python3 imagepadder2.py '/Users/apple/Pictures/best_friends_photo.jpg' aspect 16
 | 4: Color | Background color in hex format (e.g., `#FFFFFF` for white) |
 | 5: Opacity | Background opacity, 0-255 (e.g., `255` for fully opaque) |
 
-For custom padding:
+For image custom padding:
 ```
 python3 imagepadder2.py '/Users/apple/Pictures/best_friends_photo.jpg' custom 20 30 20 30 #000000 128
 ```
@@ -99,7 +112,7 @@ python3 imagepadder2.py '/Users/apple/Pictures/best_friends_photo.jpg' custom 20
 | 7: Color | Background color in hex format (e.g., `#000000` for black) |
 | 8: Opacity | Background opacity, 0-255 (e.g., `128` for half-transparent) |
 
-**Video Padding (Command-line only)**
+**Video Padding (works the same way)**
 
 For video aspect ratio padding:
 ```
@@ -111,13 +124,9 @@ For video custom padding:
 python3 imagepadder2.py '/Users/apple/Videos/vacation.mp4' custom 50 50 50 50 #0000FF 255
 ```
 
-The parameters work the same way as for images, but the tool will automatically detect if the file is a video based on the extension (mp4, avi, mov, mkv, webm, wmv). Note that the script is still called "imagepadder2.py" even for videos.
+##### Interactive Prompt (Works with both Images and Videos) #####
 
-**Note:** Video processing takes longer than image processing, especially for longer videos.
 
-### Interactive Prompt (Works with both Images and Videos)
-
-You can use the interactive prompt with both images and videos - the tool will automatically detect the file type:
 ```
 python3 imagepadder2.py
 ```
@@ -150,30 +159,20 @@ OR
 > Background opacity (0-255, default: 255): 128
 ```
 
-## Working with High-Resolution Images
+### Notes ###
 
-While most image processing tools in browsers have canvas size limitations (typically around 16,384 × 16,384 pixels), the command-line version of Image Padder can handle much larger images by using Python's PIL/Pillow library directly. For gigapixel images or other extremely large files, the command-line version is the recommended approach, otherwise the website works fine.
+####Working with High-Resolution Images####
 
-## Working with Videos
-The command-line version supports padding videos to different aspect ratios or adding custom padding. Supported formats include MP4, AVI, MOV, MKV, WEBM, and WMV. The padding is applied to each frame while preserving the original audio track. Due to the processing required, video padding may take some time depending on the length and resolution of the video.
+While most image processing tools in browsers have canvas size limitations (typically around 16,384 × 16,384 pixels), the command-line version of Image Padder can handle much larger images by using Python's PIL/Pillow library directly. For gigapixel images, or other extremely large files, the command-line version or GUI are needed, otherwise the website works fine.
 
+####Working with Videos####
+The command-line version and python GUI support padding videos to different aspect ratios or adding custom padding. Supported formats include MP4, AVI, MOV, MKV, WEBM, and WMV. The padding is applied to each frame while preserving the original audio track. Due to the processing required, video padding may take some time depending on the length and resolution of the video, but progress is shown in command line, and somewhat in the logs section of the GUI.
 
-### GUI Mode
+The parameters work the same way as for images, but the tool will automatically detect if the file is a video based on the extension (mp4, avi, mov, mkv, webm, wmv). Note that the script is still called "imagepadder2.py" even for videos. 
 
-![GUI Screenshot](https://github.com/amitjoshi24/ImagePadder/blob/main/guiss.jpg)
+You can use the interactive prompt, CLI arguments, or GUI with both images and videos - the tool will automatically detect the file type and pad accordingly:
 
-The application now includes a graphical user interface:
-
-1. Run: `python imagepaddergui.py`
-2. Select an image or video using the "Browse" button
-3. Choose between "Aspect Ratio" or "Custom Padding" modes
-4. Configure your padding settings
-5. Select a background color (with optional transparency)
-6. Click "Process" to create your padded image/video
-
-### Additional Options:
-
-You can add background color and opacity:
+#### Examples ####
 
 | **Command** | **Description** |
 |-------------|-----------------|
@@ -181,7 +180,7 @@ You can add background color and opacity:
 | `python imagepaddergui.py` | Launch the graphical user interface |
 | `python -m imagepadder2 image.jpg aspect 16x9` | Pad to 16:9 aspect ratio |
 | `python -m imagepadder2 image.jpg custom 10 20 30 40` | Custom padding (top, right, bottom, left) |
-| `python -m imagepadder2 image.jpg aspect 1x1 #FF0000 128` | Square with semi-transparent red background |
+| `python -m imagepadder2 image.jpg aspect 1x1 #FF0000 128` | Square with semi-transparent (128 out of 255) red (#FF0000) background |
 
 ## Credits
 
