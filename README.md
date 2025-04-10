@@ -112,7 +112,7 @@ python3 imagepadder2.py '/Users/apple/Pictures/best_friends_photo.jpg' custom 20
 | 7: Color | Background color in hex format (e.g., `#000000` for black) |
 | 8: Opacity | Background opacity, 0-255 (e.g., `128` for half-transparent) |
 
-##### Video Padding (works the same way)
+###### Video Padding (works the same way)
 
 For video aspect ratio padding:
 ```
