@@ -159,7 +159,7 @@ OR
 > Background opacity (0-255, default: 255): 128
 ```
 
-##### Examples
+#### Examples
 
 | **Command** | **Description** |
 |-------------|-----------------|
