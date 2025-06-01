@@ -1,7 +1,7 @@
 # Image and Video Padder
 
 <p align="center">
-  <img src="https://github.com/amitjoshi24/ImagePadder/raw/main/favicon.jpg" width="150" alt="Image Padder Logo">
+  <img src="https://github.com/amitjoshi2724/ImagePadder/raw/main/favicon.jpg" width="150" alt="Image Padder Logo">
 </p>
 
 A tool that pads images or videos to any aspect ratio while preserving the original resolution. Add space around your images/videos with custom padding or convert to specific aspect ratios like 16:9, 4:3, 1:1 square, and more. Perfect for social media posts or vlogs, video thumbnails, and printing.
@@ -17,7 +17,7 @@ A tool that pads images or videos to any aspect ratio while preserving the origi
 - Works with all common video formats (mp4, mov, etc.)
 
 ## Website  
-[https://amitjoshi24.github.io/ImagePadder/](https://amitjoshi24.github.io/ImagePadder/)  
+[https://amitjoshi2724.github.io/ImagePadder/](https://amitjoshi2724.github.io/ImagePadder/)  
 
 The web version is the easiest way to use Image Padder, with a user-friendly interface and additional options like custom padding. The website does NOT support video padding, for that keep reading.
 
@@ -69,7 +69,7 @@ Fortunately, I have just made a new GUI if you prefer
 
 #### GUI Mode
 
-![GUI Screenshot](https://github.com/amitjoshi24/ImagePadder/blob/main/guiss.jpg)
+![GUI Screenshot](https://github.com/amitjoshi2724/ImagePadder/blob/main/guiss.jpg)
 
 1. Run: `python imagepaddergui.py`
 2. Select an image or video using the "Browse" button
@@ -193,6 +193,6 @@ If you find this tool useful, consider supporting its development through one of
 
 - [PayPal](https://paypal.me/amitjoshi168)
 - [Venmo](https://venmo.com/Amit-Joshi-11) 
-- [Ko-fi](https://ko-fi.com/amitjoshi24)
+- [Ko-fi](https://ko-fi.com/amitjoshi2724)
 
 Thank you for your support!
