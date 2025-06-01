@@ -185,7 +185,7 @@ You can use the interactive prompt, CLI arguments, or GUI with both images and v
 
 ## Credits
 
-The program and the image padding algorithm were originally written by Amit Joshi ([@amitjoshi24](https://github.com/amitjoshi24)). Code improvements were made by Jeffrey Wang ([@jeffw16](https://github.com/jeffw16)).
+The program and the image padding algorithm were originally written by Amit Joshi ([@amitjoshi2724](https://github.com/amitjoshi2724)). Code improvements were made by Jeffrey Wang ([@jeffw16](https://github.com/jeffw16)).
 
 ## Support the Project
 
