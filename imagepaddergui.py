@@ -270,8 +270,8 @@ class ImagePadderGUI:
         author_label.pack(side=tk.LEFT)
         
         # Add GitHub button next to the text
-        github_button = ttk.Button(author_frame, text="GitHub: @amitjoshi24", 
-                                 command=lambda: self.open_url("https://github.com/amitjoshi24"))
+        github_button = ttk.Button(author_frame, text="GitHub: @amitjoshi2724", 
+                                 command=lambda: self.open_url("https://github.com/amitjoshi2724"))
         github_button.pack(side=tk.LEFT, padx=(0, 5))
         
         # Show correct frame based on initial mode
